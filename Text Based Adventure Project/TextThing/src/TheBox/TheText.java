@@ -37,7 +37,7 @@ public class TheText
 	private final int Choose_Weapon = 2;
 	private final int Begin_Mission = 3;
 	private final int Finish = 4;
-	private final int Apothecary = 5;
+	private final int MedBay = 5;
 	private final int Options = 6;
 
 	public int Mission_Count = 0;
@@ -65,7 +65,7 @@ public class TheText
 				System.out.println("\t(" + Choose_Weapon + ") Pick Weapon");
 				System.out.println("\t(" + Begin_Mission + ") Begin Mission");
 				System.out.println("\t(" + Finish + ") Finish Mission");
-				System.out.println("\t(" + Apothecary + ") Apothecary");
+				System.out.println("\t(" + MedBay + ") Apothecary");
 				System.out.println("\t(" + Options + ") Options");
 				System.out.print("Enter choice >> ");
 				theChoice = keyboard.nextInt();
@@ -85,10 +85,8 @@ public class TheText
 				case Finish:
 					exit();
 					break;
-				case Apothecary:
-					display_Enemy_Status();
-					display_Status();
-					//Healing();
+				case MedBay:
+					Healing();
 					break;
 				case Options:
 					Set_Options();
