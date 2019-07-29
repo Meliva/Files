@@ -5,7 +5,7 @@ public class Dice
 	public int Accuracy()
 	{
 		Random RamAccuracy = new Random();
-		int accuracy = RamAccuracy.nextInt(8)+1;
+		int accuracy = RamAccuracy.nextInt(10)+1;
 		return accuracy;
 	}
 	

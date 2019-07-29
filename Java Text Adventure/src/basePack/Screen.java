@@ -2,119 +2,110 @@
 package basePack;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 public class Screen extends Application 
 {
-	static Dice AccRolls = new Dice();
-	static Dice ArmRolls = new Dice();
-	static Dice CrtRolls = new Dice();
-	static Dice TrnRolls = new Dice();
-	static Dice T1_Target = new Dice();
-	static Dice T2_Target = new Dice();
-	private int Turn_Count = 0;
-	private int Turn_Combat = 0;
-
-	private int BuildType;
-	static Stats BuildStats = new Stats (0,0);
-	static WeaponList BuildWeapon = new WeaponList(null, 0, 0, 0);
-
-	static WeaponList PlayerWeapon = new WeaponList(null, 0, 0, 0);
-	static Stats PlayerStats = new Stats (0,0);
-	static Stats PlayerStatsRoll = new Stats (0,0);
-	public int AmmoRoll;
-	public String PlayerName = null;
-
-	static Stats AllyStat = new Stats (0,0);
-	static Stats AllyStatRoll = new Stats (0,0);
-	static WeaponList AllyWeapon = new WeaponList(null, 0, 0, 0);
-	public int AllyAmmoRoll;
-	public String AllyName = null;
-	static Stats AllyStat_2 = new Stats (0,0);
-	static Stats AllyStat_2Roll = new Stats (0,0);
-	static WeaponList Ally_2Weapon = new WeaponList(null, 0, 0, 0);
-	public int Ally_2AmmoRoll;
-	public String Ally_2Name = null;
-	private int AllyCount = 0;
-
-	public int statCounter = 0;
-	public int AttackType = 0;
-	public boolean Hit = false;
-
-	static Stats NeutralStats = new Stats (0,0);
-	static WeaponList NeutralWeapon = new WeaponList(null, 0, 0, 0);
-	public int NeutralAmmoRoll;
-
-	static Stats BuildEnemyStats = new Stats (0,0);
-	static WeaponList BuildEnemyWeapon = new WeaponList(null, 0, 0, 0);
-
-	static WeaponList EnemyWeapon = new WeaponList(null, 0, 0, 0);
-	public int EnemyAmmoRoll;
-	static Stats EnemyStats = new Stats (0,0);
-	static Stats EnemyStatsRoll = new Stats (0,0);
-
-	public int EnemyParty = 0;
-
-	static WeaponList EnemyUnitWeapon = new WeaponList(null, 0, 0, 0);
-	public int EnemyAmmoUnitRoll;
-	static Stats EnemyUnitStats = new Stats (0,0);
-	static Stats EnemyUnitStatsRoll = new Stats (0,0);
-
-	public WeaponList EnemyUnit_2Weapon = new WeaponList(null, 0, 0, 0);
-	public int EnemyAmmoUnit_2Roll;
-	static Stats EnemyUnit_2Stats = new Stats (0,0);
-	static Stats EnemyUnit_2StatsRoll = new Stats (0,0);
-
-	static WeaponList EnemyWeaponBoss = new WeaponList(null, 0, 0, 0);
-	public int EnemyAmmoBoss;
-	static Stats EnemyBoss = new Stats (0,0);
-	static Stats EnemyBossRoll = new Stats (0,0);
-
-	private String RollLine;
-	private int Grabber;
-	private int randFlag;
-
-	private int Mission_Count = 0;
-	private int EnemyCount = 0;
-	private boolean Attack = true;
-	private int Score = 0;
-	private int Random = 0;
-
-	private int baseX = 0;
-	private int baseY = 0;
-	//The base X and Y are not changed as they are the map
-	private int customX = 0;
-	private int customY = 0;
-
-	private int PlayerXLocation;
-	private int PlayerYLocation;
-	private int EnemyXLocation;
-	private int EnemyYLocation;
-	static Dice enemyMove = new Dice();
-
-	private boolean PlayerRange = false;
-	private boolean EnemyRange = false;
-
-	Cover MakeCover = new Cover (0, 0, 0);
-	public int coverType = 0;
-	private int turn = 0;
-	private int loop = 0;
-
-	private TextArea TABase = new TextArea();
-	private TextField TF = new TextField();
-	private Button clearB = new Button("Clear");
-	private Button proceedB = new Button("Proceed");
-	private TextArea TALog = new TextArea();
-	private TextArea TALocation = new TextArea();
-
+	static Dice AccRolls = new Dice();//The dice for accuracy 
+	static Dice ArmRolls = new Dice();//The dice for armour\armor saving
+	static Dice CrtRolls = new Dice();//The dice for critical hits
+	static Dice TrnRolls = new Dice();//The dice for deciding who goes first
+	static Dice T1_Target = new Dice();//The dice for which person is targeted
+	static Dice T2_Target = new Dice();//Same as one above, to avoid overriding of targeting wrong person
+	private int BuildType;// An int which tells builds are being applied to (i.e player or ally)
+	static Stats BuildStats = new Stats (0,0);//A neutral stat which is chosen by player
+	static WeaponList BuildWeapon = new WeaponList(null, 0, 0, 0);// A neutral weapon which is chosen by player
+	static WeaponList PlayerWeapon = new WeaponList(null, 0, 0, 0);//Player weapon which is applied by build weapon
+	static Stats PlayerStats = new Stats (0,0);//Player stat which is applied by build stat
+	static Stats PlayerStatsRoll = new Stats (0,0);//Player stat roll back needed for when healing option is selected 
+	public int AmmoRoll;// Ammo roll for player weapon to reset value once the reload function is executed 
+	public String PlayerName = null;//Player name
+	static Stats AllyStat = new Stats (0,0);// A neutral stat which is applied by build stat
+	static Stats AllyStatRoll = new Stats (0,0);// A roll back to heal the first ally to full values
+	static WeaponList AllyWeapon = new WeaponList(null, 0, 0, 0); // A Ally weapon  which is applied by build weapon
+	public int AllyAmmoRoll; // Ammo roll for ally weapon for when they reload
+	public String AllyName = null; // Ally name
+	static Stats AllyStat_2 = new Stats (0,0);// Second ally stat applied by build stat
+	static Stats AllyStat_2Roll = new Stats (0,0);// Roll back for healing of second ally
+	static WeaponList Ally_2Weapon = new WeaponList(null, 0, 0, 0); // Second ally weapon applied by build weapon
+	public int Ally_2AmmoRoll;//Roll back for ammo
+	public String Ally_2Name = null;// Second ally name
+	private int AllyCount = 0;// Counter for the how many allies the player has
+	public int statCounter = 0;//Used to allow the player to enter stats once
+	public int AttackType = 0;//Attack type of which person is attacking
+	public boolean Hit = false;//A boolean of the hit value will turn true if the dice is equal, automatically set to false with each attack
+	static Stats NeutralStats = new Stats (0,0);//Used in the attack area and used to damage the target's stats of the one it has been given
+	static WeaponList NeutralWeapon = new WeaponList(null, 0, 0, 0);//Used to grab the attacker's weapon values
+	public int NeutralAmmoRoll;//Used in attack area to reload the attackers weapon
+	static Stats BuildEnemyStats = new Stats (0,0);//The neutral stats for the enemy
+	static WeaponList BuildEnemyWeapon = new WeaponList(null, 0, 0, 0);//The neutral weapon for the enemy
+	static WeaponList EnemyWeapon = new WeaponList(null, 0, 0, 0);//Weapon for the first enemy
+	public int EnemyAmmoRoll;//Ammo roll for the first enemy
+	static Stats EnemyStats = new Stats (0,0);//Stats for the first enemy
+	static Stats EnemyStatsRoll = new Stats (0,0);//Stats roll back for the first enemy
+	public int EnemyParty = 0;// Counter for the enemy party (will have the stats and weapons given but will only be active if you have allies[goes on a 1:1 scale])
+	static WeaponList EnemyUnitWeapon = new WeaponList(null, 0, 0, 0);//Weapon for the secound enemy
+	public int EnemyAmmoUnitRoll;//Ammo roll for secound enemy
+	static Stats EnemyUnitStats = new Stats (0,0);//Stats for secound enemy
+	static Stats EnemyUnitStatsRoll = new Stats (0,0);//Stats roll back for secound enemy
+	public WeaponList EnemyUnit_2Weapon = new WeaponList(null, 0, 0, 0);//Weapon for third enemy
+	public int EnemyAmmoUnit_2Roll;//Ammo roll back for third enemy
+	static Stats EnemyUnit_2Stats = new Stats (0,0);//Stats for third enemy
+	static Stats EnemyUnit_2StatsRoll = new Stats (0,0);//Stats roll back for third enemy
+	static WeaponList EnemyWeaponBoss = new WeaponList(null, 0, 0, 0);//Weapon for enemy
+	public int EnemyAmmoBoss;//Ammo roll back for boss
+	static Stats EnemyBoss = new Stats (0,0);//Stats for boss
+	static Stats EnemyBossRoll = new Stats (0,0);//Stats roll back for boss
+	private String RollLine;//Used to a be applied to the screen for a death line of ally or enemy
+	private int Grabber;//Int applied to a random number (from class) and used to pull a text block of a line
+	private int randFlag;//Used for if the player decides to randomize the enemies or not
+	private int Mission_Count = 0;//Counter for how many missions have been accomplished
+	private int EnemyCount = 0;//The counter for how many enemies have been made by the player
+	private int Score = 0;//The score for the player which can increase
+	private int Random = 0;//The int value which the value of what the enemy will be
+	private int baseX = 0;//The bottom of X value will stay at 0
+	private int baseY = 0;//The bottom of Y value will stay at 0
+	private int customX = 0;//Will be the maximum of the X value
+	private int customY = 0;//Will be the maximum of the Y value
+	private int PlayerXLocation;//The X location for the player (and allies)
+	private int PlayerYLocation;//The Y location for the player (and allies)
+	private int EnemyXLocation;//The X location for Enemies (as well as other enemies)
+	private int EnemyYLocation;//The Y location for Enemies (as well as other enemies)
+	static Dice enemyMove = new Dice();//Dice function for which direction the enemy will move in
+	private boolean PlayerRange = false;//Boolean for if the player is in range (only takes the player range)
+	private boolean EnemyRange = false;//Boolean for if the enemy is in range (enemy has the same range all round)
+	Cover MakeCover = new Cover (0, 0, 0);//Cover object
+	public int coverType = 0;//used for the enemy if they have cover or not
+	private int turn = 0;//Counter for how many turns have been going
+	private int loop = 0;//Used for the generating map (cover and location)
+	private TextArea TABase = new TextArea();//Main screen
+	private TextField TF = new TextField();//Text field for what the player can enter
+	private Button clearB = new Button("Clear");//Clear button clears all screens
+	private Button proceedB = new Button("Proceed");//Button to go forward with anything
+	private TextArea TALog = new TextArea();//The screen which shows combat things
+	private TextArea TALocation = new TextArea();//The screen that shows the X and Y location of the player and enemy
+	static File theFile = new File ("Results\\PlayerResults.txt"); //A file to where the results are released to
+	Date theDate;//The current date on the machine	
+	private int result = 0;//Used to print if the player dies or completes the missions
+	private int theAttacker = 0;//Used to switch the attacker
+	private int count = 0;//Used to count the turns
+	private int playerCount = 0;
+	private int enemyCount = 0;
+	private boolean coverCheck = false;//Boolean for cover
 	//-------------------------------------------------------
-	public static void main(String[] args) 
+	public static void main(String[] args) throws IOException
 	{
+		//theFile.createNewFile(); //Used to create the file within the location specified 
 		Application.launch();
 	}
 
@@ -123,6 +114,10 @@ public class Screen extends Application
 		build(stage);
 		stage.setTitle("Text Adventure!");
 		stage.show();
+		stage.setOnCloseRequest(e->{
+			Platform.exit();
+			System.exit(0);
+		});
 		Thread.currentThread().setUncaughtExceptionHandler((thread, exception) ->
 		{
 			Alert update = new Alert(Alert.AlertType.ERROR);
@@ -135,6 +130,7 @@ public class Screen extends Application
 			}
 		});
 	}
+
 	public void build(Stage stage) throws Exception 
 	{
 		//Min and Max size of the TABase text area
@@ -210,8 +206,8 @@ public class Screen extends Application
 		String S1 = "Status";
 		String S2 = "Begin";
 		String S3 = "Finish";
-		String S4 = "MedBay";
-		String S5 = "Members";
+		String S4 = "Healing";
+		String S5 = "Barracks";
 		String S6 = "Options";
 		TABase.appendText("-------------------------------------------------------------");
 		TABase.appendText("\nMenu ");
@@ -236,15 +232,15 @@ public class Screen extends Application
 			}
 			else if(TF.getText().equalsIgnoreCase(S3))
 			{
-				exit();
+				finishMissions();
 			}
 			else if(TF.getText().equalsIgnoreCase(S4))
 			{
-				Healing();
+				healing();
 			}
 			else if(TF.getText().equalsIgnoreCase(S5))
 			{
-				Barracks();
+				barracks();
 			}
 			else if(TF.getText().equalsIgnoreCase(S6))
 			{
@@ -263,15 +259,21 @@ public class Screen extends Application
 			}
 		});
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
-	public void exit() //Exit function
+	public void finishMissions() //When player has finished a set amount of missions
 	{
 		if(Mission_Count == 3)
 		{
-			//Checks if mission count is equal or greater then 3
 			TABase.appendText("\nEnough Missions have been done! ("+Mission_Count+"/3)");
 			TABase.appendText("\nScore: ["+Score+"]");
-			System.exit(0);
+			result = 1;
+			try 
+			{
+				print();		
+			} 
+			catch (FileNotFoundException e) 
+			{
+				System.out.println("File not found");
+			}
 		}
 		else if(Mission_Count > 3)
 		{
@@ -284,21 +286,27 @@ public class Screen extends Application
 			}
 			TABase.appendText("\nMore than enough missions have been done! ("+Mission_Count+"/3)");
 			TABase.appendText("\nScore: ["+Score+"]");
-			sleep();	
+			result = 2;
+			try 
+			{
+				print();		
+			} 
+			catch (FileNotFoundException e) 
+			{
+				System.out.println("File not found");
+			}
 		}
 		else
 		{
 			TABase.appendText("\nNot enough Missions! ("+Mission_Count+"/3)");
 		}
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void buildMissions()
 	{
 		//clearB.setDisable(true);
 		if (EnemyCount == 0 || PlayerStats == null || PlayerWeapon == null)
 		{
 			TABase.appendText("\nEnsure Player is given Stats and the enemy type is decided:");
-			sleep();
 		}
 		else
 		{
@@ -310,7 +318,6 @@ public class Screen extends Application
 			moveMissions();
 		}
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void moveMissions()
 	{
 		if(AllyCount == 2)
@@ -321,6 +328,8 @@ public class Screen extends Application
 		{
 			EnemyParty = 1;
 		}
+		//TABase.clear();
+		//attackMission();
 		if(PlayerRange == false && EnemyRange == false)
 		{
 			if(PlayerRange == true)
@@ -331,122 +340,200 @@ public class Screen extends Application
 			{
 				EnemyAttack();
 			}
-
-			if(Turn_Combat == 1)
-			{
-				Move();
-				Enemymove();
-			}
-			else
-			{
-				Enemymove();
-				Move();
-			}
+			Enemymove();
+			Move();
+			locationShow();
 		}
 		if(PlayerRange == true && EnemyRange == true)
 		{
-			attackMissions();	
+			TABase.clear();
+			attackMission();	
 		}
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
-	public void attackMissions()
+	public void attackMission()
 	{
-		if(Attack = false)
+		TF.clear();
+		if(EnemyCount == 0)
 		{
 			TABase.appendText("\nAll Enmies Killed");
 			Mission_Count = Mission_Count + 1;
 			turn = 0;
+			TABase.clear();
 			start();
 		}
-		else if (Attack = true)
+		else if (EnemyCount != 0)
 		{
 			TABase.appendText("\n-------------------------------------------------------------");
-			TABase.appendText("\nEnimes: "+EnemyCount +"\nAllies: "+AllyCount);
-			TABase.appendText("Press '1' to Attack \nPress '2' for Status \n>>");
-			TALog.appendText("\n-------------------------------------------------------------");
-			TALog.appendText("\nTurn: "+turn);
-			TALog.appendText("\n-------------------------------------------------------------");
+			TABase.appendText("\nEnimes: "+EnemyCount+"\nAllies: "+AllyCount);
+			TABase.appendText("\nType 'Combat' to Attack \nType 'Stats' for Status");
 			proceedB.setOnAction((e) ->
 			{
 				if(TF.getText().equalsIgnoreCase("Combat"))
 				{
-					if(Turn_Combat == 1)
-					{
-						PlayerAttack();
-						EnemyAttack();
-					}
-					else
-					{
-						EnemyAttack();
-						PlayerAttack();				
-					}
-					turn = turn +1;
+					combatCombo();
+				}
+				else if(TF.getText().equalsIgnoreCase("Stats"))
+				{
+					display_Status();
 				}
 			});
 		}
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public int PrimtiveStike()
 	{
-		if(Turn_Count != 1)
+		if(TrnRolls.Turn() == 1 || TrnRolls.Turn() == 2)
 		{
-			if(TrnRolls.Turn() == 1 || TrnRolls.Turn() == 3)
+			theAttacker = 1;
+			TABase.appendText("\nYou Get The Upper Hand!");
+		}
+		else
+		{
+			theAttacker = 2;
+			TABase.appendText("\nThe Enemy Gets The Upper Hand!");				
+		}
+		return theAttacker;
+	}
+	public void combatCombo()
+	{
+		System.out.println("Begin: "+count);
+		if(count == 2)
+		{
+			count = 0;
+			TF.clear();
+			attackMission();
+		}
+		else
+		{
+			if(theAttacker == 1)
 			{
-				Turn_Combat = 1;
-				Turn_Count = 1;
-				TABase.appendText("\nYou Get The Upper Hand!");
+				turn = turn +1;
+				count++;
+				PlayerAttack();
+
 			}
-			else
+			else if(theAttacker == 2)
 			{
-				Turn_Combat = 2;
-				Turn_Count = 1;
-				TABase.appendText("\nThe Enemy Gets The Upper Hand!");				
+				turn = turn +1;
+				count++;
+				EnemyAttack();
 			}
 		}
-		sleep();
-		return Turn_Combat;
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void PlayerAttack()
 	{
-		AttackType = 1;
-		Attack();
-		if(AllyCount == 2)
+		System.out.println("Player checker: "+coverCheck);
+		if(coverType == 1)
 		{
-			AttackType = 2;
-			Attack();
-			AttackType = 3;
-			Attack();
+			coverCheck = true;
 		}
-		if(AllyCount == 1)
+		else
 		{
-			AttackType = 2;
-			Attack();
+			coverCheck = false;
 		}
+		theAttacker = 2;
+		if(playerCount == 3)
+		{
+			playerCount = 0;
+			combatCombo();
+		}
+		else
+		{
+			if(playerCount == 0)
+			{
+				AttackType = 1;
+				turn = turn +1;
+				if(AllyCount == 0)
+				{
+					playerCount = 3;
+				}
+				else if(AllyCount == 1 || AllyCount == 2)
+				{
+					playerCount++;
+				}
+				Attack();
+			}
+			else if(playerCount == 1)
+			{
+				AttackType = 2;
+				turn = turn +1;
+				if(AllyCount == 1)
+				{
+					playerCount = 3;
+				}
+				else if (AllyCount == 2)
+				{
+					playerCount++;
+				}
+				Attack();
+			}
+			else if(playerCount == 2)
+			{
+				AttackType = 3;
+				turn = turn +1;
+				playerCount++;
+				Attack();
+			}
+		}		
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void EnemyAttack()
 	{
-		AttackType = 4;
-		Attack();
-		if(EnemyParty == 2)
+		System.out.println("Enemy checker: "+coverCheck);
+		if(coverType == 2)
 		{
-			AttackType = 5;
-			Attack();
-			AttackType = 6;
-			Attack();
+			coverCheck = true;
 		}
-		if(EnemyParty == 1)
+		else
 		{
-			AttackType = 5;
-			Attack();
+			coverCheck = false;
 		}
+		theAttacker = 1;
+		if(enemyCount == 3)
+		{
+			enemyCount = 0;
+			combatCombo();
+		}
+		else
+		{
+			if(enemyCount == 0)
+			{
+				AttackType = 4;
+				turn = turn +1;
+				if(EnemyParty == 0)
+				{
+					enemyCount = 3;
+				}
+				else if(EnemyParty == 1 || EnemyParty == 2)
+				{
+					enemyCount++;
+				}
+				Attack();
+			}
+			else if(enemyCount == 1)
+			{
+				AttackType = 5;
+				turn = turn +1;
+				if(EnemyParty == 1)
+				{
+					enemyCount = 3;
+				}
+				else if(EnemyParty == 2)
+				{
+					enemyCount++;
+				}
+				Attack();
+			}
+			else if(enemyCount == 2)
+			{
+				AttackType = 6;
+				turn = turn +1;
+				enemyCount++;
+				Attack();
+			}
+		}	
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
-	public void Attack()
+	public void Attack()//All Neutral values are overridden  by different attacking people
 	{
-		int damage = 0;
-		//All Neutral values are overridden  by different attacks times
+		int damage = 0;		
 		if(AttackType == 1 || AttackType == 2 || AttackType == 3)
 		{
 			int T1 = T1_Target.Target();
@@ -560,7 +647,7 @@ public class Screen extends Application
 				if(T2 == 1 ||  T2 == 4 || T2 == 5)
 				{
 					NeutralStats = PlayerStats;
-					TABase.appendText("\nTargeting "+PlayerName);
+					TALog.appendText("\nTargeting "+PlayerName);
 				}
 			}
 			if(AllyCount == 0)
@@ -569,7 +656,6 @@ public class Screen extends Application
 				TALog.appendText("\nTargeting "+PlayerName);
 			}
 		}
-
 		//Attack begins with neutral weapon
 		if(NeutralWeapon.getAmmo() == 0 && NeutralWeapon.getRange() != 1)
 		{
@@ -580,15 +666,25 @@ public class Screen extends Application
 		{
 			if(NeutralWeapon.getRange() == 1) 
 			{
-				if(AccRolls.Accuracy() == 1 || AccRolls.Accuracy() == 3 || AccRolls.Accuracy() == 4 || AccRolls.Accuracy() == 5 || AccRolls.Accuracy() == 7)
+				if(Hit == true && coverCheck == true && MakeCover.getCoverHealth() != 0)
 				{
+					
+				}
+				else if(AccRolls.Accuracy() == 1 || AccRolls.Accuracy() == 3 || AccRolls.Accuracy() == 5 || AccRolls.Accuracy() == 7 || AccRolls.Accuracy() == 9)
+				{
+					//5/10 hit chance 5/10 miss chance
 					Hit = true;
 				}
 			}
 			else if(NeutralWeapon.getRange() > 1)
 			{
-				if(AccRolls.Accuracy() == 1 || AccRolls.Accuracy() == 3 || AccRolls.Accuracy() == 4 || AccRolls.Accuracy() == 7)
+				if(Hit == true && coverCheck == true && MakeCover.getCoverHealth() != 0)
 				{
+					
+				}
+				else if(AccRolls.Accuracy() == 1 || AccRolls.Accuracy() == 3 || AccRolls.Accuracy() == 5 || AccRolls.Accuracy() == 7)
+				{
+					//4/10 hit chance 6/10 miss chance
 					Hit = true;
 				}
 			}
@@ -596,23 +692,28 @@ public class Screen extends Application
 			{
 				TALog.appendText("\n'Missed'!");
 			}
-			if(Hit == true)
-			{
-				if(CrtRolls.Crit() == 11 || CrtRolls.Crit() == 12)
+			else if(Hit == true)
+			{	
+				if(NeutralWeapon.getRange() == 1 && CrtRolls.Crit() == 11 || CrtRolls.Crit() == 12)
+				{
+					damage = damage * 2;
+					TALog.appendText("A Critical Hit!");
+				}
+				else if(NeutralWeapon.getRange() > 1 && CrtRolls.Crit() == 10 || CrtRolls.Crit() == 11 || CrtRolls.Crit() == 12)
 				{
 					damage = damage * 2;
 					TALog.appendText("A Critical Hit!");
 				}
 				if(ArmRolls.Save() == 1 || ArmRolls.Save() == 3 || ArmRolls.Save() == 5)
 				{
-					if(NeutralStats.getArmour() <= 0)
+					if(NeutralStats.getArmour() <= 0)//Used if hit was armour save but no armour exists
 					{
 						TALog.appendText("\nHealth Damage: "+damage);
 						NeutralStats.damageHealth(damage);
 					}
 					else
 					{
-						TALog.appendText("\nArmour Save: "+damage);
+						TALog.appendText("\nArmour Damage: "+damage);
 						NeutralStats.damageArmour(damage);
 					}
 				}
@@ -622,17 +723,19 @@ public class Screen extends Application
 					NeutralStats.damageHealth(damage);
 				}
 			}
-			NeutralWeapon.Fire();
-			//Fires Weapon
+			NeutralWeapon.Fire();//Fires Weapon
 		}
-		Checker();
-		//Checks If Anything has died
-		Hit = false;
-		//Rests Hit Boolean
-		sleep();
-		attackMissions();
+		Checker();//Checks If Anything has died
+		Hit = false;//Rests Hit Boolean
+		if(AttackType == 1||AttackType == 2||AttackType == 3)
+		{
+			PlayerAttack();
+		}
+		else if(AttackType == 4||AttackType == 5||AttackType == 6)
+		{
+			EnemyAttack();
+		}
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void Checker()
 	{
 		if(PlayerStats.getHealth() <= 0)
@@ -653,8 +756,7 @@ public class Screen extends Application
 			EnemyKilled();
 		}
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
-	public void Healing()
+	public void healing()
 	{
 		PlayerStats.HealHp(PlayerStatsRoll.getHealth());
 		PlayerStats.HealArmour(PlayerStatsRoll.getArmour());
@@ -663,14 +765,12 @@ public class Screen extends Application
 		AllyStat_2.HealHp(AllyStat_2Roll.getHealth());
 		AllyStat_2.HealArmour(AllyStat_2Roll.getArmour());
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
-	public void Barracks()
+	public void barracks()
 	{
 		TF.clear();
 		if(AllyCount == 2)
 		{
 			TABase.appendText("\nMax Ally Count Reached");
-			sleep();
 		}
 		else if (AllyCount == 1) //Add ally count 
 		{
@@ -697,7 +797,6 @@ public class Screen extends Application
 			});
 		}
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void setOptions()
 	{
 		TF.clear();
@@ -709,7 +808,6 @@ public class Screen extends Application
 			randomEnemy();
 		});		
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void randomEnemy()
 	{
 		TF.clear();
@@ -727,9 +825,9 @@ public class Screen extends Application
 			EnemyMaker();
 		});
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void EnemyMaker()
 	{
+		TF.clear();
 		if(randFlag == 1)
 		{
 			Random RamEnemy = new Random();
@@ -748,6 +846,7 @@ public class Screen extends Application
 			TABase.appendText("\n| 4 | Hungry Ones | 20 | 20 |");
 			TABase.appendText("\n| 5 | Metal Skeletons | 30 | 50 |");
 			TABase.appendText("\n| 6 | Blue Shooters | 15 | 15 |");
+			TABase.appendText("\n| 9 | Dummy | 1 | 0 |");
 			TABase.appendText("\n|--------|------|-Damage-|-Range-|-Rounds-|");
 			TABase.appendText("\n| 1 | Evil Bolter | 6 | Medium (3) | 3 |");
 			TABase.appendText("\n| 2 | Thin Shooty Gun | 7  | Medium (3) | 4 |");
@@ -834,14 +933,12 @@ public class Screen extends Application
 		//Bounces Map
 		MapMaker();
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void buildPlayer()
 	{
 		TF.clear();
 		if(statCounter == 1 )
 		{
 			TABase.appendText("\nStatus Already Selected");
-			sleep();
 		}
 		else
 		{
@@ -850,7 +947,7 @@ public class Screen extends Application
 			TABase.appendText("\n-------------------------------------------------------------");
 			proceedB.setOnAction((e) ->
 			{
-				if(TF.getText() == null)
+				if(!TF.getText().matches("[0-9]+"))
 				{
 					PlayerName = TF.getText();
 					BuildType = 1;
@@ -860,7 +957,7 @@ public class Screen extends Application
 				{
 					Alert update = new Alert(Alert.AlertType.WARNING);
 					update.setHeaderText("Invalid Entry");
-					update.setContentText("Value entered is null or not equal to values one screen");
+					update.setContentText("Value entered is null or has numbers");
 					Optional<ButtonType> result =update.showAndWait();
 					if(result.get() == ButtonType.OK)
 					{
@@ -870,10 +967,8 @@ public class Screen extends Application
 			});
 		}
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
-	public void statBuilder()
+	public void statBuilder()//Build health and armour
 	{
-		//Build health and armour
 		TF.clear();
 		TABase.appendText("\n-------------------------------------------------------------");
 		TABase.appendText("\n|-Number-|-Health-|-Armour-|");
@@ -913,9 +1008,8 @@ public class Screen extends Application
 
 		});
 	}
-	public void weaponBuilder()
+	public void weaponBuilder()//Build weapon
 	{
-		//Build weapon
 		TF.clear();
 		TABase.appendText("\n-------------------------------------------------------------");
 		TABase.appendText("\n|-Name-|-Damage-|-Range-|-Rounds-|");
@@ -960,9 +1054,8 @@ public class Screen extends Application
 			}
 		});
 	}
-	public void buildType()
+	public void buildType()//Checks the build type number and applies the values selected to that class	
 	{
-		//Checks the build type number and applies the values selected to that class		
 		if(BuildType == 1)
 		{
 			PlayerStats = BuildStats;
@@ -989,149 +1082,129 @@ public class Screen extends Application
 		}
 		start();
 	}
-	public void PlayerDeath()
+	public void PlayerDeath()//When Play dies this class is activated
 	{
-		//When Play dies this class is activated
 		TABase.appendText("\nYou Died!");
-		TABase.appendText("\nScore: ["+Score+"]");
-		System.exit(0);
+		result = 3;
+		try 
+		{
+			print();		
+		} 
+		catch (FileNotFoundException e) 
+		{
+			System.out.println("File not found");
+		}
 	}
-	public void AllyDeath()
+	public void AllyDeath()	//When AlLy dies, checks which ally has 0 or less health and resets the stats and reduces ally count
 	{
-		//When AlLy dies, checks which ally has 0 or less health and resets the stats and reduces ally count
 		if(AllyStat.getHealth() <=0)
 		{
-			TABase.appendText(AllyName+" Has Fallen!");
+			TABase.appendText("/n"+AllyName+" Has Fallen!");
 			AllyName = null;
 			AllyStat = new Stats (0,0);
 			AllyWeapon = new WeaponList(null, 0, 0, 0);
 			AllyCount = AllyCount - 1;
+			switcher();
 		}
-		if (AllyStat_2.getHealth() <=0)
+		else if (AllyStat_2.getHealth() <=0 && AllyCount == 2)
 		{
-			TABase.appendText(Ally_2Name+" Has Fallen!");
+			TABase.appendText("/n"+Ally_2Name+" Has Fallen!");
 			Ally_2Name = null;
 			AllyStat_2 = new Stats (0,0);
 			Ally_2Weapon = new WeaponList(null, 0, 0, 0);
 			AllyCount = AllyCount - 1;
 		}
-		switcher();
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
-	public void switcher()
-	{
-		//Switches ally 2 with ally 1 as the second ally will be removed
+	public void switcher()//Switches ally 2 with ally 1 as this class only goes off if the first ally has died
+	{	
 		if(AllyCount == 1 && AllyStat.getHealth() == 0 && AllyStat_2.getHealth() !=0)
 		{
-			TABase.appendText(Ally_2Name+" is moveed to position 1!");
+			TABase.appendText("/n"+Ally_2Name+" is moveed to position 1!");
 			AllyName = Ally_2Name;
 			AllyStat = AllyStat_2;
 			AllyWeapon = Ally_2Weapon;
 		}
-	}	//---------------------------------------------------------------------------------------------------------------------------------------
-	public void LineGrabber()
+	}
+	public void LineGrabber()//Grabs a line to be used with a death of any ally/enemy
 	{
-		//Grabs a line to be used with a death of any ally/enemy
 		Random RamLine = new Random();
 		Grabber = RamLine.nextInt(9)+1;
 		Lines.GrabWord(Grabber);
 		RollLine = Lines.getWord();
-		TABase.appendText(RollLine);
+		TALog.appendText("s\n"+RollLine);
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
-	public void EnemyKilled()
+	public void EnemyKilled()//Checks which enemy has been killed
 	{
-		//Checks which enemy has been killed
 		if(EnemyStats.getHealth() <= 0)
 		{
-			TABase.appendText("Enemy #1 Killed");
+			TABase.appendText("\nEnemy #1 Killed");
 			Score = Score + 50;
 			EnemyCount = EnemyCount -1;
 			EnemyStats.HealHp(EnemyStatsRoll.getHealth());
 			EnemyStats.HealArmour(EnemyStatsRoll.getArmour());
 		}
-		if(EnemyUnitStats.getHealth() <= 0)
+		else if(EnemyUnitStats.getHealth() <= 0)
 		{
-			TABase.appendText("Enemy #2 Killed");
+			TABase.appendText("\nEnemy #2 Killed");
 			Score = Score + 50;
 			EnemyCount = EnemyCount -1;
 			EnemyUnitStats.HealHp(EnemyUnitStatsRoll.getHealth());
 			EnemyUnitStats.HealArmour(EnemyUnitStatsRoll.getArmour());
 		}
-		if(EnemyUnit_2Stats.getHealth() <=0)
+		else if(EnemyUnit_2Stats.getHealth() <=0 && EnemyParty == 2)
 		{
-			TABase.appendText("Enemy #3 Killed");
+			TABase.appendText("\nEnemy #3 Killed");
 			Score = Score + 50;
 			EnemyCount = EnemyCount -1;
 			EnemyUnit_2Stats.HealHp(EnemyUnit_2StatsRoll.getArmour());
 			EnemyUnit_2Stats.HealArmour(EnemyUnit_2StatsRoll.getArmour());
 		}
-		if(EnemyCount != 0)
-		{
-			TABase.appendText("Another Enemy Sighted");
-			Turn_Combat = 0;
-			Turn_Count = 0;
-		}
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void display_Status()
 	{
-		TABase.appendText("=========================");
-		TABase.appendText(PlayerName);
-		TABase.appendText("[--Stats--] \n"+PlayerStats);
-		TABase.appendText("--Weapon-- \n"+PlayerWeapon);
-		TABase.appendText("=========================");
-		sleep();
+		TALog.appendText("\n====");
+		TALog.appendText("\n"+PlayerName);
+		TALog.appendText("\n "+PlayerStats);
+		TALog.appendText("\n===");
 		if(AllyCount == 2)
 		{
-			TABase.appendText("=========================");
-			TABase.appendText(Ally_2Name);
-			TABase.appendText("--Stats-- \n"+AllyStat_2);
-			TABase.appendText("--Weapon-- \n"+Ally_2Weapon);
-			TABase.appendText("=========================");
-			TABase.appendText("=========================");
-			TABase.appendText(AllyName);
-			TABase.appendText("--Stats-- \n"+AllyStat);
-			TABase.appendText("--Weapon-- \n"+AllyWeapon);
-			TABase.appendText("=========================");
+			TALog.appendText("\n===");
+			TALog.appendText("\n"+Ally_2Name);
+			TALog.appendText("\n"+AllyStat_2);
+			TALog.appendText("\n===");
+			TALog.appendText("\n"+AllyName);
+			TALog.appendText("\n"+AllyStat);
+			TALog.appendText("\n===");
 		}
 		else if(AllyCount == 1)
 		{
-			TABase.appendText("=========================");
-			TABase.appendText(AllyName);
-			TABase.appendText("--Stats-- \n"+AllyStat);
-			TABase.appendText("--Weapon-- \n"+AllyWeapon);
-			TABase.appendText("=========================");
+			TALog.appendText("\n===");
+			TALog.appendText("\n"+AllyName);
+			TALog.appendText("\n"+AllyStat);
+			TALog.appendText("\n===");
 		}
-		TABase.appendText("=========================");
-		TABase.appendText("Enemy Status");
-		TABase.appendText("--Enemy Stats-- \n"+EnemyStats);
-		TABase.appendText("--Enemy Weapon-- \n"+EnemyWeapon);
-		TABase.appendText("=========================");
+		TALog.appendText("\n===");
+		TALog.appendText("\nEnemy Status");
+		TALog.appendText("\n"+EnemyStats);
+		TALog.appendText("\n===");
 		if(EnemyParty == 2)
 		{
-			TABase.appendText("=========================");
-			TABase.appendText("Enemy Status");
-			TABase.appendText("--Enemy Stats-- \n"+EnemyUnit_2Stats);
-			TABase.appendText("--Enemy Weapon-- \n"+EnemyUnit_2Weapon);
-			TABase.appendText("=========================");
-			TABase.appendText("=========================");
-			TABase.appendText("Enemy Status");
-			TABase.appendText("--Enemy Stats-- \n"+EnemyUnitStats);
-			TABase.appendText("--Enemy Weapon-- \n"+EnemyUnitWeapon);
-			TABase.appendText("=========================");
+			TALog.appendText("\n===");
+			TALog.appendText("\nEnemy #3 Status");
+			TALog.appendText("\n"+EnemyUnit_2Stats);
+			TALog.appendText("\n===");
+			TALog.appendText("\nEnemy Status");
+			TALog.appendText("\n"+EnemyUnitStats);
+			TALog.appendText("\n===");
 		}
 		else if(EnemyParty == 1)
 		{
-			TABase.appendText("=========================");
-			TABase.appendText("Enemy Status");
-			TABase.appendText("--Enemy Stats-- \n"+EnemyUnitStats);
-			TABase.appendText("--Enemy Weapon-- \n"+EnemyUnitWeapon);
-			TABase.appendText("=========================");
+			TALog.appendText("\n===");
+			TALog.appendText("\nEnemy #2 Status");
+			TALog.appendText("\n"+EnemyUnitStats);
+			TALog.appendText("\n===");
 		}
-		sleep();
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void Xloc()
 	{
 		TF.clear();
@@ -1213,7 +1286,6 @@ public class Screen extends Application
 		MakeCover.CoverYMaker(customY);
 		MapCheck();
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void RangeCheck()
 	{
 		//Checks player location and adds weapon range and if it equals the Enemy location the player is in range of the enemy the minus one is to only include the weapon range
@@ -1236,7 +1308,6 @@ public class Screen extends Application
 			EnemyRange = true;
 		}
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void MapCheck()
 	{
 		//Checks when the enemy spawn are on the edge of the map and they are sorted again if they are
@@ -1271,7 +1342,6 @@ public class Screen extends Application
 			MapMaker();
 		}
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void BoundryCheck()
 	{
 		//Checks when the enemy spawn to move it away from the edges of the map
@@ -1295,34 +1365,32 @@ public class Screen extends Application
 			EnemyYLocation = EnemyYLocation - 1;
 			Enemymove();
 		}
-
 		//Checks if the player reaches the limits of the map they are moved back one 
 		if(PlayerXLocation == baseX)
 		{
-			TABase.appendText("You cannot go any futher right");
+			TABase.appendText("\nYou cannot go any futher right");
 			PlayerXLocation = PlayerXLocation + 1;
 			Move();
 		}
 		else if(PlayerXLocation == customX)
 		{
-			TABase.appendText("You cannot go any futher left");
+			TABase.appendText("\nYou cannot go any futher left");
 			PlayerXLocation = PlayerXLocation - 1;
 			Move();
 		}
 		else if(PlayerYLocation == baseY)
 		{
-			TABase.appendText("You cannot go any futher down");
+			TABase.appendText("\nYou cannot go any futher down");
 			PlayerYLocation = PlayerYLocation + 1;
 			Move();
 		}
 		else if(PlayerYLocation == customY)
 		{
-			TABase.appendText("You cannot go any futher up");
+			TABase.appendText("\nYou cannot go any futher up");
 			PlayerYLocation = PlayerYLocation - 1;
 			Move();
 		}
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 	public void Move()
 	{
 		TF.clear();
@@ -1334,30 +1402,53 @@ public class Screen extends Application
 			if(TF.getText().equalsIgnoreCase("move up"))
 			{
 				PlayerYLocation = PlayerYLocation + 1;
-				TABase.appendText("You move up");
-				//Checks if player moves towards edge of map
-				BoundryCheck();
+				TABase.appendText("\nYou move up");
+				BoundryCheck();//Checks if player moves towards edge of map
+				RangeCheck();//Range check is used at the end of a movement
+				moveMissions();//Moves player back to the move mission as it causes a loop
 			}
 			else if(TF.getText().equalsIgnoreCase("move down"))
 			{
 				PlayerYLocation = PlayerYLocation - 1;
-				TABase.appendText("You move down");
-				//Checks if player moves towards edge of map
-				BoundryCheck();
+				TABase.appendText("\nYou move down");
+				BoundryCheck();//Checks if player moves towards edge of map
+				RangeCheck();//Range check is used at the end of a movement
+				moveMissions();//Moves player back to the move mission as it causes a loop
 			}
 			else if(TF.getText().equalsIgnoreCase("move left"))
 			{
 				PlayerXLocation = PlayerXLocation + 1;
-				TABase.appendText("You move left");
-				//Checks if player moves towards edge of map
-				BoundryCheck();
+				TABase.appendText("\nYou move left");
+				BoundryCheck();//Checks if player moves towards edge of map
+				RangeCheck();//Range check is used at the end of a movement
+				moveMissions();//Moves player back to the move mission as it causes a loop
 			}
 			else if(TF.getText().equalsIgnoreCase("move right"))
 			{
 				PlayerXLocation = PlayerXLocation - 1;
-				TABase.appendText("You move right");
-				//Checks if player moves towards edge of map
-				BoundryCheck();
+				TABase.appendText("\nYou move right");	
+				BoundryCheck();//Checks if player moves towards edge of map
+				RangeCheck();//Range check is used at the end of a movement
+				moveMissions();//Moves player back to the move mission as it causes a loop
+			}
+			else if(TF.getText().equalsIgnoreCase("stay"))
+			{
+				PlayerXLocation = PlayerXLocation - 1;
+				TABase.appendText("\nYou stay where you are");	
+				RangeCheck();//Range check is used at the end of a movement
+				moveMissions();//Moves player back to the move mission as it causes a loop
+			}
+			else if(TF.getText().equalsIgnoreCase("cover me"))
+			{
+				PlayerXLocation = MakeCover.getCoverXLocation();
+				PlayerYLocation = MakeCover.getCoverYLocation();
+				moveMissions();//Moves player back to the move mission as it causes a loop
+			}
+			else if(TF.getText().equalsIgnoreCase("cover them"))
+			{
+				EnemyYLocation = MakeCover.getCoverYLocation();
+				EnemyXLocation = MakeCover.getCoverXLocation();
+				moveMissions();//Moves player back to the move mission as it causes a loop
 			}
 		});
 		if(PlayerYLocation == MakeCover.getCoverYLocation() && PlayerXLocation == MakeCover.getCoverXLocation())
@@ -1369,38 +1460,15 @@ public class Screen extends Application
 		{
 			coverType = 0;
 		}
-		//Range check is used at the end of a movement
-		RangeCheck();
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
-	public void Enemymove()
+	public void Enemymove()//Enemy moves in a random direction, will 'bounce' if goes near a border and move another direction, if it is on the same X or Y value of a cover piece it shall move towards it
 	{
-		//Enemy moves in a random direction, will 'bounce' if goes near a border and move another direction, if it is on the same X or Y value of a cover piece it shall move towards it
-		TALog.appendText("The enemy moves...");
-		if(EnemyYLocation == MakeCover.getCoverYLocation() && EnemyXLocation <= MakeCover.getCoverXLocation())
+		if(EnemyYLocation == MakeCover.getCoverYLocation() && EnemyXLocation == MakeCover.getCoverXLocation())
 		{
-			EnemyXLocation = EnemyXLocation - 1;
+			coverType = 2;	
 		}
-		else if(EnemyYLocation == MakeCover.getCoverYLocation() && EnemyXLocation >= MakeCover.getCoverXLocation())
+		else if(coverType == 0)	//Enemy will stay in cover
 		{
-			EnemyXLocation = EnemyXLocation + 1;
-		}
-		else if(EnemyXLocation == MakeCover.getCoverXLocation() && EnemyYLocation <= MakeCover.getCoverYLocation())
-		{
-			EnemyYLocation = EnemyYLocation - 1;
-		}
-		else if(EnemyXLocation == MakeCover.getCoverXLocation() && EnemyYLocation >= MakeCover.getCoverYLocation())
-		{
-			EnemyYLocation = EnemyYLocation + 1;
-		}
-		else if(EnemyYLocation == MakeCover.getCoverYLocation() && EnemyXLocation == MakeCover.getCoverXLocation())
-		{
-			coverType = 1;
-			//Gives the int a value of 1 as it is the enemy that is in cover
-		}
-		else
-		{
-			TABase.appendText("No cover in location");
 			if(enemyMove.move() == 1)
 			{
 				EnemyYLocation = EnemyYLocation + 1;
@@ -1419,69 +1487,34 @@ public class Screen extends Application
 			}
 			coverType = 0;
 		}
-		//Checks if enemy moves towards edge of map
-		BoundryCheck();
-		//Range check is used at the end of a movement
-		RangeCheck();
+		BoundryCheck();//Checks if enemy moves towards edge of map
+		RangeCheck();//Range check is used at the end of a movement
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
-	public void locationShow()
+	public void locationShow()//Shows location of both player and enemy as well as a map
 	{
-		//Shows location of both player and enemy as well as a map
 		TALocation.appendText("\nPlayer: Y-["+PlayerYLocation+"] X-["+PlayerXLocation+"]");
 		TALocation.appendText("\nEnemy: Y-["+EnemyYLocation+"] X-["+EnemyXLocation+"]\n");
-		/*
-		int x = 0;
-		int y = 0;
-		for (x=0; x <= customX; x++) 
-		{
-			for(y=0; y <= customY; y++)
-			{
-				if(PlayerYLocation == y && PlayerXLocation == x)
-				{
-					TALocation.appendText(" + ");
-				}
-				if(EnemyYLocation == y && EnemyXLocation == x)
-				{
-					TALocation.appendText(" - ");
-				}
-				if(MakeCover.getCoverXLocation() == x && MakeCover.getCoverYLocation() == y)
-				{
-					TALocation.appendText("[");
-					if(PlayerYLocation == MakeCover.getCoverYLocation() && PlayerXLocation == MakeCover.getCoverXLocation())
-					{
-						TALocation.appendText("+");
-					}
-					else if(EnemyYLocation == MakeCover.getCoverYLocation() && EnemyXLocation == MakeCover.getCoverXLocation())
-					{
-						TALocation.appendText("-");
-					}
-					else
-					{
-						TALocation.appendText(" ");
-					}
-					TALocation.appendText("]");
-				}
-				else
-				{
-					TALocation.appendText(" * ");
-				}
-			}
-			TALocation.appendText("\n ");
-		}
-		 */
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
-	public void sleep()
+	public void print() throws FileNotFoundException //Prints results to the text document
 	{
-		try
+		PrintWriter out = new PrintWriter("PlayerResults.txt");
+		out.println("-----------");
+		if(result == 1)
 		{
-			Thread.sleep(500);
+			out.println("Result: player finish");
 		}
-		catch(InterruptedException e)
+		else if(result == 2)
 		{
-			System.err.println(e.getMessage());
+			out.println("Result: player finished with extra score");
 		}
+		else if(result == 3)
+		{
+			out.println("Result: player death");
+		}
+		out.println(PlayerName);
+		out.println(theDate);
+		out.println(Score);
+		out.println("-----------");
+		out.close();
 	}
-	//---------------------------------------------------------------------------------------------------------------------------------------
 }
