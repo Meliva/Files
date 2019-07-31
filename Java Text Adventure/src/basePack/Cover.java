@@ -4,10 +4,7 @@ public class Cover
 {
 	private int CoverXLocation;
 	private int CoverYLocation;
-	private int CoverNumber;
 	private int CoverHealth;
-	
-	private boolean value;
 	
 	public Cover(int CoverXLocation, int CoverYLocation, int CoverHealth)
 	{
@@ -52,28 +49,10 @@ public class Cover
 	{
 		return CoverYLocation;
 	}
-	
-	public int getCoverNumber()
-	{
-		return CoverNumber;
-	}
-	
-	public boolean CoverTrue(int a)
-	{
-		if(a == CoverNumber)
-		{
-			value = true;
-		}
-		else
-		{
-			value = false;
-		}
-		return value;
-	}
-	
+		
 	public String toString()
 	{
-		String display = "X:["+CoverXLocation+"] Y:["+CoverYLocation+"] HP:["+CoverNumber+"]";
+		String display = "X:["+CoverXLocation+"] Y:["+CoverYLocation+"] HP:["+CoverHealth+"]";
 		return display;
 	}
 }

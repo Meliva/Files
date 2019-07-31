@@ -17,6 +17,7 @@ public class Stats
 	{ 
 		return health; 
 	}
+	
 	public int getArmour() 
 	{ 
 		return armour; 
@@ -40,10 +41,22 @@ public class Stats
 		return health;
 	}
 	
+	public int addHp(int ah) 
+	{ 
+		health = health + ah;
+		return health; 
+	}
+	
 	public int HealArmour(int arm)
 	{
 		armour = arm;
 		return armour;
+	}
+	
+	public int addArmour(int aa) 
+	{ 
+		armour = armour + aa;
+		return armour; 
 	}
 	
 	public String toString()

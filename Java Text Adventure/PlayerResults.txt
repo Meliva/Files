@@ -1,0 +1,6 @@
+-----------
+Result: player death
+u
+null
+8650
+-----------
