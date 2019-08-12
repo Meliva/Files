@@ -2,14 +2,15 @@ package basePack;
 
 public class Lines 
 {
-	int deathLine = 0;
-	static String Word;
+	protected int deathLine = 0;
+	protected static String Word;
+	
 	public static String GrabWord(int a)
 	{
 		switch (a)
 		{
 		case 1 :
-			Word = "Bleh";
+			Word = "Blleehh";
 			break;
 		case 2 :
 			Word = "Aarrgghh";
@@ -18,7 +19,7 @@ public class Lines
 			Word = "*Death Noise*";
 			break;
 		case 4 :
-			Word = "...Ouch";
+			Word = "...Ouch...";
 			break;
 		case 5 :
 			Word = "*Death Gurgle*";
@@ -30,10 +31,35 @@ public class Lines
 			Word = "Why are my organs over there?";
 			break;
 		case 8 :
-			Word = "*Death Noise*";
+			Word = "...Ow...";
 			break;
 		case 9 :
-			Word = "...Ow";
+			Word = "...Nnoo...";
+			break;
+		}
+		return Word;
+	}
+	public static String GrabAlly(int b)
+	{
+		switch (b)
+		{
+		case 1 :
+			Word = "...Remeber me...";
+			break;
+		case 2 :
+			Word = "I...cannot...die";
+			break;
+		case 3 :
+			Word = "*Death Noise*";
+			break;
+		case 4 :
+			Word = "*Death Gurgle*";
+			break;
+		case 5 :
+			Word = "I..have...fallen";
+			break;
+		case 6 :
+			Word = "*Death Noise*";
 			break;
 		}
 		return Word;

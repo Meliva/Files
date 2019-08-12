@@ -2,12 +2,11 @@ package basePack;
 
 public class WeaponList 
 {
-	private String name;
-	private int range;
-	private int damage;
-	private String length;
-	private int ammo;
-	//public int Clip;
+	protected String name;
+	protected int range;
+	protected int damage;
+	protected String length;
+	protected int ammo;
 
 	public WeaponList(String name,int damage,int range, int ammo)
 	{

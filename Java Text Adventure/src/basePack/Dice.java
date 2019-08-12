@@ -43,11 +43,4 @@ public class Dice
 		int Move = ramMove.nextInt(4)+1;
 		return Move;
 	}
-	
-	public int dodge()
-	{
-		Random ramMove = new Random();
-		int Move = ramMove.nextInt(4)+1;
-		return Move;
-	}
 }
