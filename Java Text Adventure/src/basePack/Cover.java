@@ -2,31 +2,30 @@ package basePack;
 import java.util.Random;
 public class Cover 
 {
-	private int CoverXLocation;
-	private int CoverYLocation;
-	private int CoverHealth;
+	protected int CoverXLocation;
+	protected int CoverYLocation;
+	protected int CoverHealth;
 	
 	public Cover(int CoverXLocation, int CoverYLocation, int CoverHealth)
 	{
 		this.CoverXLocation = CoverXLocation;
 		this.CoverYLocation = CoverYLocation;
 		this.CoverHealth = CoverHealth;
-		//this.CoverNumber = CoverNumber;
 	}
 	
 	public int CoverXMaker(int x)
 	{
-		Random RamLoc = new Random();
-		int Loc = RamLoc.nextInt(x)+1;
-		CoverXLocation = Loc;
+		Random RamXLoc = new Random();
+		int XLoc = RamXLoc.nextInt(x)+1;
+		CoverXLocation = XLoc;
 		return CoverXLocation;
 	}
 	
 	public int CoverYMaker(int y)
 	{
-		Random ramLoc = new Random();
-		int loc = ramLoc.nextInt(y)+1;
-		CoverYLocation = loc;
+		Random RamYLoc = new Random();
+		int YLoc = RamYLoc.nextInt(y)+1;
+		CoverYLocation = YLoc;
 		return CoverYLocation;
 	}
 	
@@ -40,12 +39,12 @@ public class Cover
 		return CoverHealth;
 	}
 	
-	public int getCoverXLocation()
+	public int getCoverX()
 	{
 		return CoverXLocation;
 	}
 	
-	public int getCoverYLocation()
+	public int getCoverY()
 	{
 		return CoverYLocation;
 	}

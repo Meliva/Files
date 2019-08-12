@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class Stats 
 {
-	private int health;
-	private int armour;
+	protected int health;
+	protected int armour;
 	
 	public Stats(int health,int armour)
 	{
