@@ -4,14 +4,16 @@ public class WeaponList
 {
 	protected String name;
 	protected int range;
-	protected int damage;
+	protected int minDamage;
+	protected int maxDamage;
 	protected String length;
 	protected int ammo;
 
-	public WeaponList(String name,int damage,int range, int ammo)
+	public WeaponList(String name,int minDamage,int maxDamage,int range, int ammo)
 	{
 		this.name = name;
-		this.damage = damage;
+		this.minDamage = minDamage;
+		this.maxDamage = maxDamage;
 		this.range = range;
 		setLength();
 		if (range > 1)
@@ -25,10 +27,16 @@ public class WeaponList
 		--ammo;
 	}
 
-	public int addDamage(int i) 
+	public int addminDamage(int i) 
 	{ 
-		damage = damage + i;
-		return damage; 
+		minDamage = minDamage + i;
+		return minDamage; 
+	}
+	
+	public int addmaxDamage(int i) 
+	{ 
+		maxDamage = maxDamage + i;
+		return maxDamage; 
 	}
 	
 	public int Reload (int Round)
@@ -41,9 +49,15 @@ public class WeaponList
 	{ 
 		return name; 
 	}
-	public int getDamage() 
+	
+	public int getminDamage()
+	{
+		return minDamage;
+	}
+	
+	public int getmaxDamage() 
 	{ 
-		return damage; 
+		return maxDamage; 
 	}
 	public int getRange() 
 	{ 
@@ -70,19 +84,7 @@ public class WeaponList
 		}
 		else if (range == 2)
 		{
-			length = "Close";
-		}
-		else if (range == 3)
-		{
-			length = "Medium";
-		}
-		else if (range == 4)
-		{
-			length = "Far";
-		}
-		else if (range == 5)
-		{
-			length = "Very Far";
+			length = "Ranged";
 		}
 		else
 		{
@@ -92,7 +94,7 @@ public class WeaponList
 
 	public String toString()
 	{
-		String display = "Name: " + name + "\nDamage: " + damage + "\nRange: " + length +" ("+range+") " + " \nAmmo:  [" + ammo + "] ";
+		String display = "Name: " + name + "\nDamage: " + minDamage +"-"+ maxDamage + "\nRange: " + length +" ("+range+") " + " \nAmmo:  [" + ammo + "] ";
 		return display;
 	}
 }
