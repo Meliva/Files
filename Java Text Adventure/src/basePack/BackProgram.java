@@ -2,18 +2,15 @@ package basePack;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.Date;
 import java.util.Optional;
 import java.util.Random;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextField;
 
 
 public class BackProgram extends Screen
 {
-	protected static Date theDate;//The current date on the machine
 	protected static int BuildType;// An int which tells builds are being applied to (i.e player or ally)
 	protected static Stats BuildStats = new Stats (0,0);//A neutral stat which is chosen by player
 	protected static WeaponList BuildWeapon = new WeaponList(null,0,0,0,0);// A neutral weapon which is chosen by player
@@ -29,17 +26,17 @@ public class BackProgram extends Screen
 	protected static WeaponList PlayerRollWeapon = new WeaponList(null,0,0,0,0);//Player roll back weapon used to reset the stats
 	protected static Stats PlayerStats = new Stats (0,0);//Player stat which is applied by build stat
 	protected static Stats PlayerStatsRoll = new Stats (0,0);//Player stat roll back needed for when healing option is selected 
-	protected static int AmmoRoll;// Ammo roll for player weapon to reset value once the reload function is executed 
+	protected static int AmmoRoll = 0;// Ammo roll for player weapon to reset value once the reload function is executed 
 	protected static String PlayerName = null;//Player name
 	protected static Stats AllyStat = new Stats (0,0);// A neutral stat which is applied by build stat
 	protected static Stats AllyStatRoll = new Stats (0,0);// A roll back to heal the first ally to full values
 	protected static WeaponList AllyWeapon = new WeaponList(null,0,0,0,0); // A Ally weapon  which is applied by build weapon
-	protected static int AllyAmmoRoll; // Ammo roll for ally weapon for when they reload
+	protected static int AllyAmmoRoll = 0; // Ammo roll for ally weapon for when they reload
 	protected static String AllyName = null; // Ally name
 	protected static Stats AllyStat_2 = new Stats (0,0);// Second ally stat applied by build stat
 	protected static Stats AllyStat_2Roll = new Stats (0,0);// Roll back for healing of second ally
 	protected static WeaponList Ally_2Weapon = new WeaponList(null,0,0,0,0); // Second ally weapon applied by build weapon
-	protected static int Ally_2AmmoRoll;//Roll back for ammo
+	protected static int Ally_2AmmoRoll = 0;//Roll back for ammo
 	protected static String Ally_2Name = null;// Second ally name
 	protected static int AllyCount = 0;// Counter for the how many allies the player has
 	protected static int statCounter = 0;//Used to allow the player to enter stats once
@@ -47,34 +44,34 @@ public class BackProgram extends Screen
 	protected static boolean Hit = false;//A boolean of the hit value will turn true if the dice is equal, automatically set to false with each attack
 	protected static Stats NeutralStats = new Stats (0,0);//Used in the attack area and used to damage the target's stats of the one it has been given
 	protected static WeaponList NeutralWeapon = new WeaponList(null,0,0,0,0);//Used to grab the attacker's weapon values
-	protected static int NeutralAmmoRoll;//Used in attack area to reload the attackers weapon
+	protected static int NeutralAmmoRoll = 0;//Used in attack area to reload the attackers weapon
 	protected static int minDamage = 0;//minDamage value used in attacks
 	protected static int maxDamage = 0;//maxDamage value used in attacks
 	protected static int attackDamage = 0;//The damage value that is selected
 	protected static Stats BuildEnemyStats = new Stats (0,0);//The neutral stats for the enemy
 	protected static WeaponList BuildEnemyWeapon = new WeaponList(null,0,0,0,0);//The neutral weapon for the enemy
 	protected static WeaponList EnemyWeapon = new WeaponList(null,0,0,0,0);//Weapon for the first enemy
-	protected static int EnemyAmmoRoll;//Ammo roll for the first enemy
+	protected static int EnemyAmmoRoll = 0;//Ammo roll for the first enemy
 	protected static Stats EnemyStats = new Stats (0,0);//Stats for the first enemy
 	protected static Stats EnemyStatsRoll = new Stats (0,0);//Stats roll back for the first enemy
 	protected static int EnemyParty = 0;// Counter for the enemy party (will have the stats and weapons given but will only be active if you have allies[goes on a 1:1 scale])
 	protected static WeaponList EnemyUnitWeapon = new WeaponList(null,0,0,0,0);//Weapon for the secound enemy
-	protected static int EnemyAmmoUnitRoll;//Ammo roll for secound enemy
+	protected static int EnemyAmmoUnitRoll = 0;//Ammo roll for secound enemy
 	protected static Stats EnemyUnitStats = new Stats (0,0);//Stats for secound enemy
 	protected static Stats EnemyUnitStatsRoll = new Stats (0,0);//Stats roll back for secound enemy
 	protected static WeaponList EnemyUnit_2Weapon = new WeaponList(null,0,0,0,0);//Weapon for third enemy
-	protected static int EnemyAmmoUnit_2Roll;//Ammo roll back for third enemy
+	protected static int EnemyAmmoUnit_2Roll = 0;//Ammo roll back for third enemy
 	protected static Stats EnemyUnit_2Stats = new Stats (0,0);//Stats for third enemy
 	protected static Stats EnemyUnit_2StatsRoll = new Stats (0,0);//Stats roll back for third enemy
 	protected static WeaponList EnemyWeaponBoss = new WeaponList(null,0,0,0,0);//Weapon for enemy
-	protected static int EnemyAmmoBoss;//Ammo roll back for boss
+	protected static int EnemyAmmoBoss = 0;//Ammo roll back for boss
 	protected static Stats EnemyBoss = new Stats (0,0);//Stats for boss
 	protected static Stats EnemyBossRoll = new Stats (0,0);//Stats roll back for boss
 	protected static String RollLine;//Used to a be applied to the screen for a death line of ally or enemy
 	protected static int Grabber;//Int applied to a random number (from class) and used to pull a text block of a line
 	protected static int randFlag;//Used for if the player decides to randomize the enemies or not
-	protected static int MissionCount = 0;//Counter for how many missions have been accomplished
-	protected static int EnemyCount = 0;//The counter for how many enemies have been made by the player
+	protected static int enemyCounter = 0;//The counter for how many enemies have been made by the player
+	protected static int kills = 0;//Keeps score of kills
 	protected static int Score = 0;//The score for the player which can increase
 	protected static int Random = 0;//The int value which the value of what the enemy will be
 	protected static int bossIntAll = 0;//Used for value of if boss is allowed
@@ -93,7 +90,14 @@ public class BackProgram extends Screen
 	protected static int EnemyYLocation;//The Y location for Enemies (as well as other enemies)
 	protected static Dice enemyMove = new Dice();//Dice function for which direction the enemy will move in
 	protected static Cover MakeCover = new Cover (0, 0, 0);//Cover object Ignored by melee
+	protected static Cover MakeCover1 = new Cover (0, 0, 0);//Bonus cover
+	protected static Cover MakeCover2 = new Cover (0, 0, 0);//Bonus cover
+	protected static Cover MakeCover3 = new Cover (0, 0, 0);//Bonus cover
 	protected static Crate MakeCrate = new Crate (0, 0, 0, 0);//Crate that affects the player only and can only be picked up by the player
+	protected static Crate MakeCrate1 = new Crate (0, 0, 0, 0);//Bonus Crate
+	protected static Crate MakeCrate2 = new Crate (0, 0, 0, 0);//Bonus Crate
+	protected static Crate MakeCrate3 = new Crate (0, 0, 0, 0);//Bonus Crate
+	protected static int itemCounter = 0;//Used for how many items are put in a map
 	protected static int coverType = 0;//used for the enemy if they have cover or not
 	protected static int turn = 0;//Counter for how many turns have been going
 	protected static int loop = 0;//Used for the generating map (cover and location)
@@ -105,17 +109,18 @@ public class BackProgram extends Screen
 	protected static int deathType = 0;//If an ally died or an enemy 
 	protected static int mapCounter = 0;//Used to count the map to hide functions
 	protected static int combatTimer = 0;//Timer used for when movement is done, combat starts when it reaches 0
-	protected static int stepBack = 0;
+	protected static int attackLine = 0;//Used to get an attack line
 
 	public static void start()
 	{
+		TF.clear();
+		TABase.clear();
 		String S1 = "Status";
 		String S2 = "Begin";
 		String S3 = "Finish";
 		String S4 = "Healing";
 		String S5 = "Barracks";
 		String S6 = "Options";
-		TABase.appendText("-------------------------------------------------------------");
 		TABase.appendText("\nMenu ");
 		TABase.appendText("\n\t("+S1+") Pick Health, Armour & Weapon");
 		TABase.appendText("\n\t("+S2+") Begin Mission");
@@ -123,7 +128,6 @@ public class BackProgram extends Screen
 		TABase.appendText("\n\t("+S4+") Apothecary");
 		TABase.appendText("\n\t("+S5+") Barracks");
 		TABase.appendText("\n\t("+S6+") Options");
-		TABase.appendText("\n-------------------------------------------------------------");
 		TF.clear();
 		proceedB.setOnAction((e) ->
 		{
@@ -163,6 +167,7 @@ public class BackProgram extends Screen
 				}
 			}
 		});
+		setOptions();
 	}
 	public static void buildType()
 	{
@@ -173,6 +178,7 @@ public class BackProgram extends Screen
 			PlayerRollWeapon = PlayerWeapon;
 			PlayerStatsRoll = new Stats (PlayerStats.getHealth(),PlayerStats.getArmour());
 			AmmoRoll = PlayerWeapon.getAmmo(); 
+			statCounter++;
 		}
 		else if(BuildType == 2)
 		{
@@ -201,61 +207,48 @@ public class BackProgram extends Screen
 		AllyStat_2.HealHp(AllyStat_2Roll.getHealth());
 		AllyStat_2.HealArmour(AllyStat_2Roll.getArmour());
 	}
-
-	public static void Randomizer()//Scrambles both player and the enemy locations
-	{
-		Random randomY = new Random ();
-		Random randomX = new Random ();
-		PlayerYLocation = randomY.nextInt(customY) + 1;
-		PlayerXLocation = randomX.nextInt(customX) + 1;
-		Random eRandomY = new Random ();
-		Random eRandomX = new Random ();
-		EnemyYLocation = eRandomY.nextInt(customY) + 1;
-		EnemyXLocation = eRandomX.nextInt(customX) + 1;
-		MapCheck();
-	}
-
-
+	
 	public static void finishMissions() //When player has finished a set amount of missions
 	{
-		if(MissionCount == 3)
+		TF.clear();
+		TABase.clear();
+		TABase.appendText("You can finish the campain at any time, just type end. \nYou will get a score of: ["+Score+"] if you exit.");
+		TABase.appendText("\nTyping back will send you back to the menu");
+		proceedB.setOnAction((e) ->
 		{
-			TABase.appendText("\nEnough Missions have been done! ("+MissionCount+"/3)");
-			TABase.appendText("\nScore: ["+Score+"]");
-			result = 1;
-			try 
+			if(TF.getText().equalsIgnoreCase("end"))
 			{
-				print();		
-			} 
-			catch (FileNotFoundException e) 
-			{
-				System.out.println("File not found");
+				try 
+				{
+					result = 1;
+					print();		
+				} 
+				catch (FileNotFoundException o) 
+				{
+					TABase.appendText("\nFile not found");
+				}
 			}
-		}
-		else if(MissionCount > 3)
-		{
-			TABase.appendText("\nMore than enough missions have been done! ("+MissionCount+"/3)");
-			TABase.appendText("\nScore: ["+Score+"]");
-			result = 2;
-			try 
+			else if(TF.getText().equalsIgnoreCase("back"))
 			{
-				print();		
-			} 
-			catch (FileNotFoundException e) 
-			{
-				System.out.println("File not found");
+				start();
 			}
-		}
-		else
-		{
-			TABase.appendText("\nNot enough Missions! ("+MissionCount+"/3)");
-		}
+			else
+			{
+				Alert update = new Alert(Alert.AlertType.WARNING);
+				update.setHeaderText("Invalid Entry n");
+				update.setContentText("Value entered is null or not equal to values shown on the screen");
+				Optional<ButtonType> result =update.showAndWait();
+				if(result.get() == ButtonType.OK)
+				{
+					TF.clear();
+				}
+			}
+		});
 	}
 
 	public static void buildMissions()
 	{
-		//clearB.setDisable(true);
-		if (EnemyCount == 0 || PlayerStats == null)
+		if (enemyCounter == 0 || PlayerStats == null)
 		{
 			TABase.appendText("\nEnsure Player is given Stats and the enemy type is decided:");
 		}
@@ -272,7 +265,6 @@ public class BackProgram extends Screen
 
 	public static void moveMissions()
 	{
-		//combatTimer = 0;
 		if(AllyCount == 2)
 		{
 			EnemyParty = 2;
@@ -281,12 +273,13 @@ public class BackProgram extends Screen
 		{
 			EnemyParty = 1;
 		}
+
 		if(combatTimer != 0)
 		{
 			Enemymove();
 			Move();	
-			locationShow();
 			combatTimer--;
+			locationShow();
 		}
 		else
 		{
@@ -298,30 +291,22 @@ public class BackProgram extends Screen
 	public static void attackMission()
 	{
 		TF.clear();
-		if(EnemyCount == 0)
+		TABase.clear();
+		if(enemyCounter == 0)
 		{
 			TABase.appendText("\nAll Enmies Killed");
 			coverType = 0;
-			MissionCount++;
 			Score = Score + 200;
 			turn = 0;
 			TABase.clear();
 			PlayerWeapon = PlayerRollWeapon;
 			start();
 		}
-		else if (EnemyCount != 0)
+		else if (enemyCounter != 0)
 		{
-			TABase.appendText("\n-------------------------------------------------------------");
-			TABase.appendText("\nEnimes: "+EnemyCount+"\nAllies: "+AllyCount);
+			TABase.appendText("-------------------------------------------------------------");
+			TABase.appendText("\nEnimes: "+enemyCounter+"\nAllies: "+AllyCount);
 			TABase.appendText("\nType 'Combat' to Attack \nType 'Stats' for Status\nType 'Heal' to heal a small amount");
-			if(PlayerWeapon.getRange() ==2 && EnemyWeapon.getRange() == 1)
-			{
-				TABase.appendText("\nType 'Step Back' to step back giving you a high chance to dodge the enemy");
-			}
-			else if(EnemyWeapon.getRange() ==2 && PlayerWeapon.getRange() == 1)
-			{
-
-			}
 			proceedB.setOnAction((e) ->
 			{
 				if(TF.getText().equalsIgnoreCase("Combat"))
@@ -335,11 +320,6 @@ public class BackProgram extends Screen
 				else if(TF.getText().equalsIgnoreCase("Heal"))
 				{
 					tempHeal();
-				}
-				else if(PlayerWeapon.getRange() ==2 && EnemyWeapon.getRange() == 1 && TF.getText().equalsIgnoreCase("Step Back"))
-				{
-					TF.clear();
-					stepBack = 1;
 				}
 				else
 				{
@@ -455,6 +435,9 @@ public class BackProgram extends Screen
 
 	public static void EnemyAttack()
 	{
+		attackLine = 1;
+		LineGrabber();
+		attackLine = 0;
 		if(coverType == 2)
 		{
 			coverCheck = true;
@@ -509,7 +492,7 @@ public class BackProgram extends Screen
 		}	
 	}
 
-	public static void Attack()//All Neutral values are overridden  by different attacking people
+	public static void Attack()//All Neutral values are overridden by different attacking people
 	{
 		minDamage = 0;
 		maxDamage = 0;
@@ -731,7 +714,7 @@ public class BackProgram extends Screen
 		{
 			PlayerDeath();
 		}
-		if(AllyCount >= 0 && AllyCount != 0)
+		if(AllyCount <= 0 && AllyCount != 0)
 		{
 			if(AllyStat.getHealth() <=0 || AllyStat_2.getHealth() <=0)
 			{
@@ -804,14 +787,15 @@ public class BackProgram extends Screen
 	public static void setOptions()
 	{
 		TF.clear();
-		TABase.appendText("\nSet Enemy Count >> ");
+		TABase.clear();
+		TABase.appendText("Set Enemy Count >> ");
 		proceedB.setOnAction((e) ->
 		{
 			String hap = TF.getText();
 			try
 			{
-				EnemyCount = Integer.parseInt(hap);
-				if(EnemyCount <= 0)
+				enemyCounter = Integer.parseInt(hap);
+				if(enemyCounter <= 0)
 				{
 					TF.clear();
 				}
@@ -837,7 +821,8 @@ public class BackProgram extends Screen
 	public static void randomEnemy()
 	{
 		TF.clear();
-		TABase.appendText("\nRandomize enemy? yes/no >> ");
+		TABase.clear();
+		TABase.appendText("Randomize enemy? yes/no >> ");
 		proceedB.setOnAction((e) ->
 		{
 			if(TF.getText().equalsIgnoreCase("yes"))
@@ -871,42 +856,33 @@ public class BackProgram extends Screen
 		{
 			Random RamEnemy = new Random();
 			Random = RamEnemy.nextInt(7)+1;
-			TABase.appendText("\nEnemy Type Randomized!");
+			TABase.clear();
 			bossMaker();
 		}
 		else if(randFlag == 0)
 		{
-			TABase.appendText("\n-------------------------------------------------------------");
-			TABase.appendText("\n|-Number-|-Name-|-Health-|-Armour-|");
+			TABase.appendText("-------------------------------------------------------------");
+			TABase.appendText("\n|-Number-|-Name-|-Health-|-Armour-|-Damage-|-Range-|-Rounds-|");
 			TABase.appendText("\nEnemy List:");
-			TABase.appendText("\n| 1 |Traitors | 40 |40 |");
-			TABase.appendText("\n| 2 | Pointy Ears | 20 | 15 |");
-			TABase.appendText("\n| 3 | Green Ones* | 15 | 5 |");
-			TABase.appendText("\n| 4 | Hungry Ones | 20 | 20 |");
-			TABase.appendText("\n| 5 | Metal Skeletons | 30 | 50 |");
-			TABase.appendText("\n| 6 | Blue Shooters | 15 | 15 |");
-			TABase.appendText("\n| 7 | Fleshy Ones* | 20 | 0 |");
-			TABase.appendText("\n|--------|------|-Damage-|-Range-|-Rounds-|");
-			TABase.appendText("\n| 1 | Evil Bolter | 4-7 | Ranged (2) | 7 |");
-			TABase.appendText("\n| 2 | Thin Gun | 5-8  | Ranged (2) | 5 |");
-			TABase.appendText("\n| 3 | Weird Club* | 3-6 | Melee (1) | - |");
-			TABase.appendText("\n| 4 | Sharp Claws | 7-10 | Melee (1) | - |");
-			TABase.appendText("\n| 5 | Green Lazers | 4-7 | Ranged (2) | 6 |");
-			TABase.appendText("\n| 6 | Wat Beam | 11-14 | Ranged (2) | 10 |");
-			TABase.appendText("\n| 7 | Fleshy Punch* | 2-5 | Melee (1) | - |");
+			TABase.appendText("\n| 1 | Traitors | 40 | 40 | 4-7 | Ranged (2) | 7 |");
+			TABase.appendText("\n| 2 | Pointy Ears | 20 | 15 | 5-8  | Ranged (2) | 5 |");
+			TABase.appendText("\n| 3 | Green Ones* | 15 | 5 | 3-6 | Melee (1) | - |");
+			TABase.appendText("\n| 4 | Hungry Ones | 20 | 20 | 7-10 | Melee (1) | - |");
+			TABase.appendText("\n| 5 | Metal Skeletons | 30 | 50 | 4-7 | Ranged (2) | 6 |");
+			TABase.appendText("\n| 6 | Blue Shooters | 15 | 15 | 11-14 | Ranged (2) | 10 ");
+			TABase.appendText("\n| 7 | Fleshy Ones* | 20 | 0 | 11-14 | Ranged (2) | 10 ");;
 			TABase.appendText("\n *-No boss but double enemy Amount");
-			TABase.appendText("\n-------------------------------------------------------------");
 			proceedB.setOnAction((e) ->
 			{
 				if(TF.getText().equals("1") || TF.getText().equals("2") || TF.getText().equals("3") || TF.getText().equals("4") || TF.getText().equals("5") || TF.getText().equals("6") || TF.getText().equals("7"))
 				{
 					String leop = TF.getText();
 					Random = Integer.parseInt(leop);
+					TABase.clear();
 					bossMaker();
 				}
 				else
 				{
-					System.out.println(TF.getText());
 					Alert update = new Alert(Alert.AlertType.WARNING);
 					update.setHeaderText("Invalid Entry e");
 					update.setContentText("Value entered is null or not equal to values one screen");
@@ -923,14 +899,14 @@ public class BackProgram extends Screen
 	public static void bossMaker()
 	{
 		TF.clear();
-		if(EnemyCount== 1 || Random == 7 || Random == 3)
+		if(enemyCounter == 1 || Random == 7 || Random == 3)
 		{
 			moop();
 		}
-		else if(bossCounter==0)
+
+		if(bossCounter==0)
 		{
-			TABase.appendText("\n-------------------------------------------------------------");
-			TABase.appendText("\nDo You want a boss to be made?");
+			TABase.appendText("Do You want a boss to be made?");
 			TABase.appendText("\nYes or No");
 		}
 		else if(bossCounter==1)
@@ -945,77 +921,91 @@ public class BackProgram extends Screen
 		{
 			TABase.appendText("\nBoss Damage bonus->");
 		}
-		proceedB.setOnAction((e)->
+		if(bossCounter <= 4)
 		{
-			if(TF.getText().equalsIgnoreCase("No")&&bossCounter == 0)
+			proceedB.setOnAction((o)->
 			{
-				bossIntAll = 0;
-				bossMinAttack = 0;
-				bossMaxAttack = 0;
-				bossHP = 0;
-				bossArmour = 0;
-				moop();
-			}
-			else if(TF.getText().equalsIgnoreCase("Yes")&&bossCounter == 0)
-			{
-				bossIntAll = 1;
-				bossCounter ++;
-				bossMaker();
-			}
-			else if(bossCounter == 1 && !TF.getText().contains("-"))
-			{
-				bossCounter ++;
-				String hp = TF.getText();
-				try
+				if(bossCounter == 0 && TF.getText().equalsIgnoreCase("No"))
 				{
-					bossHP = Integer.parseInt(hp);
-					bossMaker();
-				}
-				catch(NumberFormatException ex)
-				{
-					Alert update = new Alert(Alert.AlertType.WARNING);
-					update.setHeaderText("Invalid Entry f");
-					update.setContentText("Value entered is null or not equal to values one screen");
-					Optional<ButtonType> result =update.showAndWait();
-					if(result.get() == ButtonType.OK)
-					{
-						TF.clear();
-					}
-				}
-			}
-			else if(bossCounter == 2 && !TF.getText().contains("-"))
-			{
-				bossCounter ++;
-				String arm = TF.getText();
-				try
-				{
-					bossArmour = Integer.parseInt(arm);
-					bossMaker();
-				}
-				catch(NumberFormatException ex)
-				{
-					Alert update = new Alert(Alert.AlertType.WARNING);
-					update.setHeaderText("Invalid Entry g");
-					update.setContentText("Value entered is null or not equal to values one screen or negative value was added");
-					Optional<ButtonType> result =update.showAndWait();
-					if(result.get() == ButtonType.OK)
-					{
-						TF.clear();
-					}
-				}
-			}
-			else if(bossCounter == 3 && !TF.getText().contains("-"))
-			{
-				String dam = TF.getText();
-				try
-				{
-					bossMinAttack = Integer.parseInt(dam);
+					bossIntAll = 0;
+					bossMinAttack = 0;
+					bossMaxAttack = 0;
+					bossHP = 0;
+					bossArmour = 0;
 					moop();
 				}
-				catch(NumberFormatException ex)
+				else if(bossCounter == 0 && TF.getText().equalsIgnoreCase("Yes"))
+				{
+					bossIntAll = 1;
+					bossCounter ++;
+					bossMaker();
+				}
+				else if(bossCounter == 1 && !TF.getText().contains("-"))
+				{		
+					String hp = TF.getText();
+					try
+					{
+						bossHP = Integer.parseInt(hp);
+						bossMaker();
+						bossCounter ++;
+					}
+					catch(NumberFormatException ex)
+					{
+						Alert update = new Alert(Alert.AlertType.WARNING);
+						update.setHeaderText("Invalid Entry BossHP");
+						update.setContentText("Value entered is null or not equal to values one screen");
+						Optional<ButtonType> result =update.showAndWait();
+						if(result.get() == ButtonType.OK)
+						{
+							TF.clear();
+						}
+					}
+				}
+				else if(bossCounter == 2 && !TF.getText().contains("-"))
+				{
+					String arm = TF.getText();
+					try
+					{
+						bossArmour = Integer.parseInt(arm);
+						bossCounter ++;
+						bossMaker();
+					}
+					catch(NumberFormatException ex)
+					{
+						Alert update = new Alert(Alert.AlertType.WARNING);
+						update.setHeaderText("Invalid Entry BossArmour");
+						update.setContentText("Value entered is null or not equal to values one screen or negative value was added");
+						Optional<ButtonType> result =update.showAndWait();
+						if(result.get() == ButtonType.OK)
+						{
+							TF.clear();
+						}
+					}
+				}
+				else if(bossCounter == 3 && !TF.getText().contains("-"))
+				{
+					String dam = TF.getText();
+					try
+					{
+						bossMinAttack = Integer.parseInt(dam);
+						moop();
+					}
+					catch(NumberFormatException ex)
+					{
+						Alert update = new Alert(Alert.AlertType.WARNING);
+						update.setHeaderText("Invalid Entry BossDamage");
+						update.setContentText("Value entered is null or not equal to values one screen");
+						Optional<ButtonType> result =update.showAndWait();
+						if(result.get() == ButtonType.OK)
+						{
+							TF.clear();
+						}
+					}
+				}
+				else
 				{
 					Alert update = new Alert(Alert.AlertType.WARNING);
-					update.setHeaderText("Invalid Entry h");
+					update.setHeaderText("Invalid Entry Boss Yes or No");
 					update.setContentText("Value entered is null or not equal to values one screen");
 					Optional<ButtonType> result =update.showAndWait();
 					if(result.get() == ButtonType.OK)
@@ -1023,19 +1013,8 @@ public class BackProgram extends Screen
 						TF.clear();
 					}
 				}
-			}
-			else
-			{
-				Alert update = new Alert(Alert.AlertType.WARNING);
-				update.setHeaderText("Invalid Entry j");
-				update.setContentText("Value entered is null or not equal to values one screen");
-				Optional<ButtonType> result =update.showAndWait();
-				if(result.get() == ButtonType.OK)
-				{
-					TF.clear();
-				}
-			}
-		});
+			});
+		}
 	}
 
 	public static void moop()
@@ -1055,7 +1034,7 @@ public class BackProgram extends Screen
 		{
 			BuildEnemyStats = new Stats(15,5);
 			BuildEnemyWeapon = new WeaponList("Weird Club",3,6,1,0);
-			EnemyCount = EnemyCount*2;
+			enemyCounter = enemyCounter*2;
 		}
 		else if(Random == 4)
 		{
@@ -1076,7 +1055,7 @@ public class BackProgram extends Screen
 		{
 			BuildStats = new Stats(20,0);
 			BuildEnemyWeapon = new WeaponList("Fleshy Punch",2,5,1,0);
-			EnemyCount = EnemyCount*2;
+			enemyCounter = enemyCounter*2;
 		}
 		//Builds First Enemy
 		EnemyStats = BuildEnemyStats;
@@ -1111,15 +1090,15 @@ public class BackProgram extends Screen
 	public static void buildPlayer()
 	{
 		TF.clear();
+		TABase.clear();
 		if(statCounter == 1 )
 		{
 			TABase.appendText("\nStatus Already Selected");
 		}
 		else
 		{
-			TABase.appendText("\n-------------------------------------------------------------");
+			TABase.appendText("(Numbers not accepted)");
 			TABase.appendText("\nEnter Name >> ");
-			TABase.appendText("\n-------------------------------------------------------------");
 			proceedB.setOnAction((e) ->
 			{
 				if(!TF.getText().matches("[0-9]+"))//The text does not contain any numbers
@@ -1146,15 +1125,14 @@ public class BackProgram extends Screen
 	public static void statBuilder()//Build health and armour
 	{
 		TF.clear();
-		TABase.appendText("\n-------------------------------------------------------------");
-		TABase.appendText("\n|-Number-|-Health-|-Armour-|");
-		TABase.appendText("\n| 1   | 20   | 20   |");
-		TABase.appendText("\n| 2   | 25   | 25   |");
-		TABase.appendText("\n| 3   | 30   | 30   |");
-		TABase.appendText("\n| 4   | 35   | 35   |");
-		TABase.appendText("\n| 5   | 40   | 40   |");
-		TABase.appendText("\nEnter Number >> ");
-		TABase.appendText("\n-------------------------------------------------------------");
+		TABase.clear();
+		TABase.appendText("|-Number-|-Health-|-Armour-|");
+		TABase.appendText("\n| 1 | 20 | 20 |");
+		TABase.appendText("\n| 2 | 25 | 25 |");
+		TABase.appendText("\n| 3 | 30 | 30 |");
+		TABase.appendText("\n| 4 | 35 | 35 |");
+		TABase.appendText("\n| 5 | 40 | 40 |");
+		TABase.appendText("\nEnter first line number >> ");
 		proceedB.setOnAction((e) ->
 		{
 			if(TF.getText().equals("1"))
@@ -1199,16 +1177,16 @@ public class BackProgram extends Screen
 
 	public static void weaponBuilder()//Build weapon
 	{
+
+		TABase.clear();
 		TF.clear();
-		TABase.appendText("\n-------------------------------------------------------------");
-		TABase.appendText("\n|-Name-|-Damage-|-Range-|-Rounds-|");
-		TABase.appendText("\n| Power Sword | 5-8 | Melee (1) | - |");
-		TABase.appendText("\n| Bolter | 2-5 | Ranged (2) | 6 |");
-		TABase.appendText("\n| Shotgun | 4-7 | Ranged (2) | 4 |");
-		TABase.appendText("\n| Sniper Bolter | 9-12 | Ranged (2) | 1 |");
-		TABase.appendText("\n| Power Hammer | 6-9 | Melee (1) | - |");
-		TABase.appendText("\nEnter Name >> ");
-		TABase.appendText("\n-------------------------------------------------------------");
+		TABase.appendText("|-Name-|-Damage-|-Range-|-Rounds-|");
+		TABase.appendText("\n| Power Sword | 5-8 | Melee | 0 |");
+		TABase.appendText("\n| Bolter | 2-5 | Ranged | 6 |");
+		TABase.appendText("\n| Shotgun | 4-7 | Ranged | 4 |");
+		TABase.appendText("\n| Sniper Bolter | 9-12 | Ranged | 1 |");
+		TABase.appendText("\n| Power Hammer | 6-9 | Melee | 0 |");
+		TABase.appendText("\nEnter name of the weapon >> ");
 		proceedB.setOnAction((e) ->
 		{
 			if(TF.getText().equalsIgnoreCase("Power Sword"))
@@ -1318,6 +1296,13 @@ public class BackProgram extends Screen
 			RollLine = Lines.getWord();
 			TALog.appendText("\n"+RollLine);
 		}
+		else if(attackLine == 1)
+		{
+			Grabber = RamLine.nextInt(3)+1;
+			Lines.combat(Grabber);
+			RollLine = Lines.getWord();
+			TALog.appendText("\n"+RollLine);
+		}
 	}
 
 	public static void EnemyKilled()//Checks which enemy has been killed
@@ -1327,7 +1312,8 @@ public class BackProgram extends Screen
 			TABase.appendText("\nEnemy #1 Killed");
 			LineGrabber();
 			Score = Score + 50;
-			EnemyCount = EnemyCount -1;
+			enemyCounter = enemyCounter -1;
+			kills ++;
 			EnemyStats.HealHp(EnemyStatsRoll.getHealth());
 			EnemyStats.HealArmour(EnemyStatsRoll.getArmour());
 		}
@@ -1336,7 +1322,8 @@ public class BackProgram extends Screen
 			TABase.appendText("\nEnemy #2 Killed");
 			LineGrabber();
 			Score = Score + 50;
-			EnemyCount = EnemyCount -1;
+			enemyCounter = enemyCounter -1;
+			kills ++;
 			EnemyUnitStats.HealHp(EnemyUnitStatsRoll.getHealth());
 			EnemyUnitStats.HealArmour(EnemyUnitStatsRoll.getArmour());
 		}
@@ -1345,11 +1332,12 @@ public class BackProgram extends Screen
 			TABase.appendText("\nEnemy #3 Killed");
 			LineGrabber();
 			Score = Score + 50;
-			EnemyCount = EnemyCount -1;
+			enemyCounter = enemyCounter -1;
+			kills ++;
 			EnemyUnit_2Stats.HealHp(EnemyUnit_2StatsRoll.getArmour());
 			EnemyUnit_2Stats.HealArmour(EnemyUnit_2StatsRoll.getArmour());
 		}
-		if(EnemyCount == 1 && bossIntAll == 1)
+		if(enemyCounter == 1 && bossIntAll == 1)
 		{
 			TABase.appendText("The last Enemy has become the boss!");
 			EnemyStats = EnemyBoss;
@@ -1409,7 +1397,8 @@ public class BackProgram extends Screen
 		if(mapCounter == 0)
 		{
 			TF.clear();
-			TABase.appendText("\nMap size Small: 10x10 \nMap size Medium: 15x15 \nMap size Large 20x20");
+			TABase.clear();
+			TABase.appendText("Map size Small: 10x10 \nMap size Medium: 15x15 \nMap size Large 20x20 \nNao size Extra Large 25x25");
 			TABase.appendText("\nEnter map size >> ");
 			proceedB.setOnAction((e) ->
 			{
@@ -1418,35 +1407,50 @@ public class BackProgram extends Screen
 					customX = 10;
 					customY = 10;
 					combatTimer = 5;
-					MapMaker();
+					itemCounter = 2;
+					mapCounter = 1;
+					MapMaker();	
 				}
 				else if(TF.getText().equalsIgnoreCase("Medium"))
 				{
 					customX = 15;
 					customY = 15;
 					combatTimer = 10;
-					MapMaker();
+					itemCounter = 4;
+					mapCounter = 1;
+					MapMaker();	
 				}
 				else if(TF.getText().equalsIgnoreCase("Large"))
 				{
 					customX = 20;
 					customY = 20;
 					combatTimer = 15;
-					MapMaker();
+					itemCounter = 6;
+					mapCounter = 1;
+					MapMaker();	
+				}
+				else if(TF.getText().equalsIgnoreCase("Extra Large"))
+				{
+					customX = 25;
+					customY = 25;
+					combatTimer = 20;	
+					itemCounter = 8;
+					mapCounter = 1;
+					MapMaker();	
 				}
 				else
 				{
 					Alert update = new Alert(Alert.AlertType.WARNING);
-					update.setHeaderText("Invalid Entry n");
+					update.setHeaderText("Invalid Entry MapMaker");
 					update.setContentText("Value entered is null or not equal to values shown on the screen");
 					Optional<ButtonType> result =update.showAndWait();
 					if(result.get() == ButtonType.OK)
 					{
 						TF.clear();
 					}
-				}
+					mapCounter = 0;
+				}	
 			});
-			mapCounter++;
 		}
 		else if(mapCounter == 1)
 		{
@@ -1454,12 +1458,7 @@ public class BackProgram extends Screen
 			if(loop == 0)
 			{
 				loop = loop + 1;
-				CoverMaker();
-			}
-			else if(loop == 1)
-			{
-				loop = loop + 1;
-				Randomizer();
+				ObjectGenerator();
 			}
 			else
 			{
@@ -1469,54 +1468,124 @@ public class BackProgram extends Screen
 		}
 	}
 
-	public static void CrateMaker()
+	public static void ObjectGenerator()
 	{
-		MakeCrate = new Crate (0, 0, 1, 0);
-		MakeCrate.CrateXMaker(customX);
-		MakeCrate.CrateYMaker(customY);
-		MapCheck();
-	}
+		if(itemCounter >= 2)
+		{
+			MakeCrate = new Crate (0, 0, 1, 0);
+			MakeCrate.CrateXMaker(customX);
+			MakeCrate.CrateYMaker(customY);
 
-	public static void CoverMaker()
-	{
-		MakeCover = new Cover (0, 0, 3);
-		MakeCover.CoverXMaker(customX);
-		MakeCover.CoverYMaker(customY);
-		MapCheck();
+			MakeCover = new Cover (0, 0, 3);
+			MakeCover.CoverXMaker(customX);
+			MakeCover.CoverYMaker(customY);
+			System.out.println("Hoop1");
+			
+		}		
+		if(itemCounter >= 4)
+		{
+			MakeCrate1 = new Crate (0, 0, 1, 0);
+			MakeCrate1.CrateXMaker(customX);
+			MakeCrate1.CrateYMaker(customY);
+
+			MakeCover1 = new Cover (0, 0, 3);
+			MakeCover1.CoverXMaker(customX);
+			MakeCover1.CoverYMaker(customY);
+			System.out.println("Hoop2");
+		}	
+		if(itemCounter >= 6)
+		{
+			MakeCrate2 = new Crate (0, 0, 1, 0);
+			MakeCrate2.CrateXMaker(customX);
+			MakeCrate2.CrateYMaker(customY);
+
+			MakeCover2 = new Cover (0, 0, 3);
+			MakeCover2.CoverXMaker(customX);
+			MakeCover2.CoverYMaker(customY);
+			System.out.println("Hoop3");
+		}
+		if(itemCounter == 8)
+		{
+			MakeCrate3 = new Crate (0, 0, 1, 0);
+			MakeCrate3.CrateXMaker(customX);
+			MakeCrate3.CrateYMaker(customY);
+
+			MakeCover3 = new Cover (0, 0, 3);
+			MakeCover3.CoverXMaker(customX);
+			MakeCover3.CoverYMaker(customY);
+			System.out.println("Hoop4");
+		}
+		//MapCheck();
 	}
 
 	public static void MapCheck()
 	{
-		if(EnemyXLocation == baseX || EnemyXLocation == customX || EnemyYLocation == baseY || EnemyYLocation == customY || PlayerXLocation == baseX || PlayerXLocation == customX || PlayerYLocation == baseY || PlayerYLocation == customY)//Checks when the enemy or player spawn are on the edge of the map and they are sorted again if they are
+		System.out.println("Hoop");
+		if(EnemyXLocation == baseX || EnemyXLocation == customX || EnemyYLocation == baseY || EnemyYLocation == customY || 
+				PlayerXLocation == baseX || PlayerXLocation == customX || PlayerYLocation == baseY || PlayerYLocation == customY)//Checks when the enemy or player spawn are on the edge of the map and they are sorted again if they are
 		{
 			Randomizer();
 		}
-		else if(MakeCover.getCoverX() == baseX || MakeCover.getCoverX() == customX || MakeCover.getCoverY() == baseY || MakeCover.getCoverY() == customY)//Checks cover piece and if it has reached the edge of the map
+		
+		if(itemCounter == 2 && (MakeCover.getCoverX() == baseX || MakeCover.getCoverX() == customX || MakeCover.getCoverY() == baseY || MakeCover.getCoverY() == customY || 
+				MakeCrate.getCrateX() == baseX || MakeCrate.getCrateX() == customX || MakeCrate.getCrateY() == baseY || MakeCrate.getCrateY() == customY))
 		{
-			CoverMaker();
+			ObjectGenerator();
 		}
-		else if(MakeCrate.getCrateX() == baseX || MakeCrate.getCrateX() == customX || MakeCrate.getCrateY() == baseY || MakeCrate.getCrateY() == customY)//Checks crate location and if it has reached the edge of the map or not
+		else if(itemCounter == 2 && (MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY()))
 		{
-			CrateMaker();
+			ObjectGenerator();
 		}
-		else if(MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY())
+		else if(itemCounter >= 4 && (MakeCover1.getCoverX() == baseX || MakeCover1.getCoverX() == customX || MakeCover1.getCoverY() == baseY || MakeCover1.getCoverY() == customY || 
+				MakeCrate1.getCrateX() == baseX || MakeCrate1.getCrateX() == customX || MakeCrate1.getCrateY() == baseY || MakeCrate1.getCrateY() == customY))
 		{
-			int Ch = 0;
-			Random Y = new Random();
-			Ch = Y.nextInt(2)+1;
-			if(Ch == 1)
-			{
-				CrateMaker();
-			}
-			else if(Ch == 2)
-			{
-				CoverMaker();
-			}
+			ObjectGenerator();
+		}
+		else if(itemCounter == 4 && ((MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY())||
+				(MakeCrate1.getCrateX() == MakeCover1.getCoverX() && MakeCrate1.getCrateY() == MakeCover1.getCoverY())))
+		{
+			ObjectGenerator();
+		}
+		else if(itemCounter == 6 && (MakeCover2.getCoverX() == baseX || MakeCover2.getCoverX() == customX || MakeCover2.getCoverY() == baseY || MakeCover2.getCoverY() == customY || 
+				MakeCrate2.getCrateX() == baseX || MakeCrate2.getCrateX() == customX || MakeCrate2.getCrateY() == baseY || MakeCrate2.getCrateY() == customY))
+		{
+			ObjectGenerator();
+		}
+		else if(itemCounter == 6 && (MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY())||
+				(MakeCrate1.getCrateX() == MakeCover1.getCoverX() && MakeCrate1.getCrateY() == MakeCover1.getCoverY())||
+				(MakeCrate2.getCrateX() == MakeCover2.getCoverX() && MakeCrate2.getCrateY() == MakeCover2.getCoverY()))
+		{
+			ObjectGenerator();
+		}
+		else if(itemCounter == 8 && (MakeCover3.getCoverX() == baseX || MakeCover3.getCoverX() == customX || MakeCover3.getCoverY() == baseY || MakeCover3.getCoverY() == customY || 
+				MakeCrate3.getCrateX() == baseX || MakeCrate3.getCrateX() == customX || MakeCrate3.getCrateY() == baseY || MakeCrate3.getCrateY() == customY))
+		{
+			ObjectGenerator();
+		}
+		else if(itemCounter == 8 && (MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY())||
+				(MakeCrate1.getCrateX() == MakeCover1.getCoverX() && MakeCrate1.getCrateY() == MakeCover1.getCoverY())||
+				(MakeCrate2.getCrateX() == MakeCover2.getCoverX() && MakeCrate2.getCrateY() == MakeCover2.getCoverY())||
+				(MakeCrate3.getCrateX() == MakeCover3.getCoverX() && MakeCrate3.getCrateY() == MakeCover3.getCoverY()))
+		{
+			ObjectGenerator();
 		}
 		else
 		{
 			MapMaker();
 		}
+	}
+	
+	public static void Randomizer()//Scrambles both player and the enemy locations
+	{
+		Random randomY = new Random ();
+		Random randomX = new Random ();
+		PlayerYLocation = randomY.nextInt(customY) + 1;
+		PlayerXLocation = randomX.nextInt(customX) + 1;
+		Random eRandomY = new Random ();
+		Random eRandomX = new Random ();
+		EnemyYLocation = eRandomY.nextInt(customY) + 1;
+		EnemyXLocation = eRandomX.nextInt(customX) + 1;
+		MapCheck();
 	}
 
 	public static void BoundryCheck()
@@ -1541,7 +1610,8 @@ public class BackProgram extends Screen
 			EnemyYLocation = EnemyYLocation - 1;
 			Enemymove();
 		}
-		else if(PlayerXLocation == baseX)//Checks if the player reaches the limits of the map they are moved back one 
+
+		if(PlayerXLocation == baseX)//Checks if the player reaches the limits of the map they are moved back one 
 		{
 			TABase.appendText("\nYou cannot go any futher right");
 			PlayerXLocation = PlayerXLocation + 1;
@@ -1570,8 +1640,9 @@ public class BackProgram extends Screen
 	public static void Move()
 	{
 		TF.clear();
+		TABase.clear();
 		//Allows the player to move in 4 directions 
-		TABase.appendText("\n-Move up- \n-Move down- \n-Move left- \n-Move right-");
+		TABase.appendText("-Move up- \n-Move down- \n-Move left- \n-Move right-");
 		TABase.appendText("\nEnter movement choice >> ");
 		proceedB.setOnAction((e) ->
 		{		
@@ -1696,8 +1767,8 @@ public class BackProgram extends Screen
 			{
 				EnemyXLocation = EnemyXLocation - 1;
 			}
+			BoundryCheck();
 		}
-		BoundryCheck();
 	}
 
 	public static void locationShow()//Shows location of both player and enemy as well as a map
@@ -1710,24 +1781,69 @@ public class BackProgram extends Screen
 
 	public static void print() throws FileNotFoundException //Prints results to the text document
 	{
-		PrintWriter out = new PrintWriter("PlayerResults.txt");
-		out.println("-----------");
-		if(result == 1)
-		{
-			out.println("Result: Player finished");
+		TF.clear();
+		TABase.clear();
+		try
+		{	
+			PrintWriter out = new PrintWriter(theFile);
+			out.println("-----------");
+			if(result == 1)
+			{
+				out.println("Result: Player finished");
+			}
+			else if(result == 3)
+			{
+				out.println("Result: Player death");
+			}
+			out.println("Name: "+PlayerName);
+			out.println("Score: "+Score);
+			out.println("Kills: "+kills);
+			out.println("-----------");
+			out.close();		
+			clear();
+			start();
 		}
-		else if(result == 2)
+		catch(Exception ex)
 		{
-			out.println("Result: Player finished with extra score");
+			TABase.appendText("\nFile not found");
 		}
-		else if(result == 3)
-		{
-			out.println("Result: Player death");
-		}
-		out.println("Name: "+PlayerName);
-		out.println("Date: "+theDate);
-		out.println("Score: "+Score);
-		out.println("-----------");
-		out.close();
+	}
+
+	public static void clear()//Clears all values
+	{
+		PlayerWeapon = new WeaponList(null,0,0,0,0);
+		PlayerRollWeapon = new WeaponList(null,0,0,0,0);
+		PlayerStats = new Stats (0,0);
+		PlayerStatsRoll = new Stats (0,0);
+		AmmoRoll = 0;
+		PlayerName = null;
+		AllyStat = new Stats (0,0);
+		AllyStatRoll = new Stats (0,0);
+		AllyWeapon = new WeaponList(null,0,0,0,0);
+		AllyAmmoRoll= 0;
+		AllyName = null;
+		AllyStat_2 = new Stats (0,0);
+		AllyStat_2Roll = new Stats (0,0);
+		Ally_2Weapon = new WeaponList(null,0,0,0,0);
+		Ally_2AmmoRoll = 0;
+		Ally_2Name = null;
+		AllyCount = 0;
+		statCounter = 0;
+		EnemyWeapon = new WeaponList(null,0,0,0,0);
+		EnemyAmmoRoll = 0;
+		EnemyStats = new Stats (0,0);
+		EnemyParty = 0;
+		EnemyUnitWeapon = new WeaponList(null,0,0,0,0);
+		EnemyAmmoUnitRoll = 0;
+		EnemyUnitStats = new Stats (0,0);
+		EnemyUnitStatsRoll = new Stats (0,0);
+		EnemyUnit_2Weapon = new WeaponList(null,0,0,0,0);
+		EnemyAmmoUnit_2Roll = 0;
+		EnemyUnit_2Stats = new Stats (0,0);
+		EnemyUnit_2StatsRoll = new Stats (0,0);
+		EnemyWeaponBoss = new WeaponList(null,0,0,0,0);
+		EnemyAmmoBoss = 0;
+		EnemyBoss = new Stats (0,0);
+		EnemyBossRoll = new Stats (0,0);
 	}
 }

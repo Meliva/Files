@@ -16,13 +16,13 @@ public class Lines
 			Word = "Aarrgghh";
 			break;
 		case 3 :
-			Word = "*Death Noise*";
+			Word = "*Death noise*";
 			break;
 		case 4 :
 			Word = "...Ouch...";
 			break;
 		case 5 :
-			Word = "*Death Gurgle*";
+			Word = "*Death gurgle*";
 			break;
 		case 6 :
 			Word = "gguuhh";
@@ -50,16 +50,32 @@ public class Lines
 			Word = "I...cannot...die";
 			break;
 		case 3 :
-			Word = "*Death Noise*";
+			Word = "*Death noise*";
 			break;
 		case 4 :
-			Word = "*Death Gurgle*";
+			Word = "*Death gurgle*";
 			break;
 		case 5 :
 			Word = "I..have...fallen";
 			break;
 		case 6 :
-			Word = "*Death Noise*";
+			Word = "My legs";
+			break;
+		}
+		return Word;
+	}
+	public static String combat(int c)
+	{
+		switch (c)
+		{
+		case 1 :
+			Word = "Die!";
+			break;
+		case 2 :
+			Word = "I shall end you!";
+			break;
+		case 3 :
+			Word = "Fight me!";
 			break;
 		}
 		return Word;
