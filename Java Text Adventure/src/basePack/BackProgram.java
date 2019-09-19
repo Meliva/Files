@@ -1,19 +1,21 @@
 package basePack;
 
 import java.io.FileNotFoundException;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.Random;
 
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-
 
 public class BackProgram extends Screen
 {
 	protected static int BuildType;// An int which tells builds are being applied to (i.e player or ally)
 	protected static Stats BuildStats = new Stats (0,0);//A neutral stat which is chosen by player
-	protected static WeaponList BuildWeapon = new WeaponList(null,0,0,0,0);// A neutral weapon which is chosen by player
+	protected static WeaponList BuildWeapon = new WeaponList(null,0,0,0,0,0);// A neutral weapon which is chosen by player
 	protected static int result = 0;//Used to print if the player dies or completes the missions
 
 	protected static Dice AccRolls = new Dice();//The dice for accuracy 
@@ -22,20 +24,21 @@ public class BackProgram extends Screen
 	protected static Dice TrnRolls = new Dice();//The dice for deciding who goes first
 	protected static Dice T1_Target = new Dice();//The dice for which person is targeted
 	protected static Dice T2_Target = new Dice();//Same as one above, to avoid overriding of targeting wrong person
-	protected static WeaponList PlayerWeapon = new WeaponList(null,0,0,0,0);//Player weapon which is applied by build weapon
-	protected static WeaponList PlayerRollWeapon = new WeaponList(null,0,0,0,0);//Player roll back weapon used to reset the stats
+	protected static Dice Pierce = new Dice();//Used for a pierce chance when armour is hit
+	protected static WeaponList PlayerWeapon = new WeaponList(null,0,0,0,0,0);//Player weapon which is applied by build weapon
+	protected static WeaponList PlayerRollWeapon = new WeaponList(null,0,0,0,0,0);//Player roll back weapon used to reset the stats
 	protected static Stats PlayerStats = new Stats (0,0);//Player stat which is applied by build stat
 	protected static Stats PlayerStatsRoll = new Stats (0,0);//Player stat roll back needed for when healing option is selected 
 	protected static int AmmoRoll = 0;// Ammo roll for player weapon to reset value once the reload function is executed 
 	protected static String PlayerName = null;//Player name
 	protected static Stats AllyStat = new Stats (0,0);// A neutral stat which is applied by build stat
 	protected static Stats AllyStatRoll = new Stats (0,0);// A roll back to heal the first ally to full values
-	protected static WeaponList AllyWeapon = new WeaponList(null,0,0,0,0); // A Ally weapon  which is applied by build weapon
+	protected static WeaponList AllyWeapon = new WeaponList(null,0,0,0,0,0); // A Ally weapon  which is applied by build weapon
 	protected static int AllyAmmoRoll = 0; // Ammo roll for ally weapon for when they reload
 	protected static String AllyName = null; // Ally name
 	protected static Stats AllyStat_2 = new Stats (0,0);// Second ally stat applied by build stat
 	protected static Stats AllyStat_2Roll = new Stats (0,0);// Roll back for healing of second ally
-	protected static WeaponList Ally_2Weapon = new WeaponList(null,0,0,0,0); // Second ally weapon applied by build weapon
+	protected static WeaponList Ally_2Weapon = new WeaponList(null,0,0,0,0,0); // Second ally weapon applied by build weapon
 	protected static int Ally_2AmmoRoll = 0;//Roll back for ammo
 	protected static String Ally_2Name = null;// Second ally name
 	protected static int AllyCount = 0;// Counter for the how many allies the player has
@@ -43,27 +46,28 @@ public class BackProgram extends Screen
 	protected static int AttackType = 0;//Attack type of which person is attacking
 	protected static boolean Hit = false;//A boolean of the hit value will turn true if the dice is equal, automatically set to false with each attack
 	protected static Stats NeutralStats = new Stats (0,0);//Used in the attack area and used to damage the target's stats of the one it has been given
-	protected static WeaponList NeutralWeapon = new WeaponList(null,0,0,0,0);//Used to grab the attacker's weapon values
+	protected static WeaponList NeutralWeapon = new WeaponList(null,0,0,0,0,0);//Used to grab the attacker's weapon values
 	protected static int NeutralAmmoRoll = 0;//Used in attack area to reload the attackers weapon
 	protected static int minDamage = 0;//minDamage value used in attacks
 	protected static int maxDamage = 0;//maxDamage value used in attacks
 	protected static int attackDamage = 0;//The damage value that is selected
+	protected static int pierceDamage = 0;//Damage used to pierce armour
 	protected static Stats BuildEnemyStats = new Stats (0,0);//The neutral stats for the enemy
-	protected static WeaponList BuildEnemyWeapon = new WeaponList(null,0,0,0,0);//The neutral weapon for the enemy
-	protected static WeaponList EnemyWeapon = new WeaponList(null,0,0,0,0);//Weapon for the first enemy
+	protected static WeaponList BuildEnemyWeapon = new WeaponList(null,0,0,0,0,0);//The neutral weapon for the enemy
+	protected static WeaponList EnemyWeapon = new WeaponList(null,0,0,0,0,0);//Weapon for the first enemy
 	protected static int EnemyAmmoRoll = 0;//Ammo roll for the first enemy
 	protected static Stats EnemyStats = new Stats (0,0);//Stats for the first enemy
 	protected static Stats EnemyStatsRoll = new Stats (0,0);//Stats roll back for the first enemy
 	protected static int EnemyParty = 0;// Counter for the enemy party (will have the stats and weapons given but will only be active if you have allies[goes on a 1:1 scale])
-	protected static WeaponList EnemyUnitWeapon = new WeaponList(null,0,0,0,0);//Weapon for the secound enemy
+	protected static WeaponList EnemyUnitWeapon = new WeaponList(null,0,0,0,0,0);//Weapon for the secound enemy
 	protected static int EnemyAmmoUnitRoll = 0;//Ammo roll for secound enemy
 	protected static Stats EnemyUnitStats = new Stats (0,0);//Stats for secound enemy
 	protected static Stats EnemyUnitStatsRoll = new Stats (0,0);//Stats roll back for secound enemy
-	protected static WeaponList EnemyUnit_2Weapon = new WeaponList(null,0,0,0,0);//Weapon for third enemy
+	protected static WeaponList EnemyUnit_2Weapon = new WeaponList(null,0,0,0,0,0);//Weapon for third enemy
 	protected static int EnemyAmmoUnit_2Roll = 0;//Ammo roll back for third enemy
 	protected static Stats EnemyUnit_2Stats = new Stats (0,0);//Stats for third enemy
 	protected static Stats EnemyUnit_2StatsRoll = new Stats (0,0);//Stats roll back for third enemy
-	protected static WeaponList EnemyWeaponBoss = new WeaponList(null,0,0,0,0);//Weapon for enemy
+	protected static WeaponList EnemyWeaponBoss = new WeaponList(null,0,0,0,0,0);//Weapon for enemy
 	protected static int EnemyAmmoBoss = 0;//Ammo roll back for boss
 	protected static Stats EnemyBoss = new Stats (0,0);//Stats for boss
 	protected static Stats EnemyBossRoll = new Stats (0,0);//Stats roll back for boss
@@ -100,22 +104,21 @@ public class BackProgram extends Screen
 	protected static int itemCounter = 0;//Used for how many items are put in a map
 	protected static int coverType = 0;//used for the enemy if they have cover or not
 	protected static int turn = 0;//Counter for how many turns have been going
-	protected static int loop = 0;//Used for the generating map (cover and location)
 	protected static int theAttacker = 0;//Used to switch the attacker
 	protected static int count = 0;//Used to count the turns
 	protected static int playerCount = 0;//Used when attacking to safely ensure all attackers get a turn
 	protected static int enemyCount = 0;//Same function as one above
 	protected static boolean coverCheck = false;//Boolean for cover
-	protected static int deathType = 0;//If an ally died or an enemy 
 	protected static int mapCounter = 0;//Used to count the map to hide functions
 	protected static int combatTimer = 0;//Timer used for when movement is done, combat starts when it reaches 0
-	protected static int attackLine = 0;//Used to get an attack line
+	protected static int tempHealer = 0;
 
 	public static void start()
 	{
+		mapCounter = 0;
 		TF.clear();
 		TABase.clear();
-		String S1 = "Status";
+		String S1 = "Stats";
 		String S2 = "Begin";
 		String S3 = "Finish";
 		String S4 = "Healing";
@@ -128,7 +131,6 @@ public class BackProgram extends Screen
 		TABase.appendText("\n\t("+S4+") Apothecary");
 		TABase.appendText("\n\t("+S5+") Barracks");
 		TABase.appendText("\n\t("+S6+") Options");
-		TF.clear();
 		proceedB.setOnAction((e) ->
 		{
 			if(TF.getText().equalsIgnoreCase(S1))
@@ -157,17 +159,30 @@ public class BackProgram extends Screen
 			}
 			else
 			{
-				Alert update = new Alert(Alert.AlertType.WARNING);
-				update.setHeaderText("Invalid Entry");
-				update.setContentText("Value entered is null or not equal to values one screen");
-				Optional<ButtonType> result =update.showAndWait();
-				if(result.get() == ButtonType.OK)
+				if(TF.getText().isEmpty())
 				{
-					TF.clear();
+					Alert update = new Alert(Alert.AlertType.WARNING);
+					update.setHeaderText("Null Entry");
+					update.setContentText("There is nothing in the text field.");
+					Optional<ButtonType> result =update.showAndWait();
+					if(result.get() == ButtonType.OK)
+					{
+						TF.clear();
+					}
+				}
+				else
+				{
+					Alert update = new Alert(Alert.AlertType.WARNING);
+					update.setHeaderText("Invalid Entry");
+					update.setContentText("The value entered is not equal to values on the screen.");
+					Optional<ButtonType> result =update.showAndWait();
+					if(result.get() == ButtonType.OK)
+					{
+						TF.clear();
+					}
 				}
 			}
 		});
-		setOptions();
 	}
 	public static void buildType()
 	{
@@ -200,23 +215,28 @@ public class BackProgram extends Screen
 	public static void healing()
 	{
 		TF.clear();
-		PlayerStats.HealHp(PlayerStatsRoll.getHealth());
-		PlayerStats.HealArmour(PlayerStatsRoll.getArmour());
-		AllyStat.HealHp(AllyStatRoll.getHealth());
-		AllyStat.HealArmour(AllyStatRoll.getArmour());
-		AllyStat_2.HealHp(AllyStat_2Roll.getHealth());
-		AllyStat_2.HealArmour(AllyStat_2Roll.getArmour());
+		PlayerStats.RestoreHp(PlayerStatsRoll.getHealth());
+		PlayerStats.RestoreArmour(PlayerStatsRoll.getArmour());
+		if(AllyCount >= 1)
+		{
+			AllyStat.RestoreHp(AllyStatRoll.getHealth());
+			AllyStat.RestoreArmour(AllyStatRoll.getArmour());
+		}
+		if(AllyCount == 2)
+		{
+			AllyStat_2.RestoreHp(AllyStat_2Roll.getHealth());
+			AllyStat_2.RestoreArmour(AllyStat_2Roll.getArmour());
+		}
 	}
-	
+
 	public static void finishMissions() //When player has finished a set amount of missions
 	{
 		TF.clear();
 		TABase.clear();
-		TABase.appendText("You can finish the campain at any time, just type end. \nYou will get a score of: ["+Score+"] if you exit.");
-		TABase.appendText("\nTyping back will send you back to the menu");
+		TABase.appendText("You can finish the campain at any time.\nYou will get a score of: ["+Score+"] if you exit."+"\nDo you want to exit? Yes/No.");
 		proceedB.setOnAction((e) ->
 		{
-			if(TF.getText().equalsIgnoreCase("end"))
+			if(TF.getText().equalsIgnoreCase("Yes"))
 			{
 				try 
 				{
@@ -228,19 +248,33 @@ public class BackProgram extends Screen
 					TABase.appendText("\nFile not found");
 				}
 			}
-			else if(TF.getText().equalsIgnoreCase("back"))
+			else if(TF.getText().equalsIgnoreCase("No"))
 			{
 				start();
 			}
 			else
 			{
-				Alert update = new Alert(Alert.AlertType.WARNING);
-				update.setHeaderText("Invalid Entry n");
-				update.setContentText("Value entered is null or not equal to values shown on the screen");
-				Optional<ButtonType> result =update.showAndWait();
-				if(result.get() == ButtonType.OK)
+				if(TF.getText().isEmpty())
 				{
-					TF.clear();
+					Alert update = new Alert(Alert.AlertType.WARNING);
+					update.setHeaderText("Null Entry");
+					update.setContentText("There is nothing in the text field.");
+					Optional<ButtonType> result =update.showAndWait();
+					if(result.get() == ButtonType.OK)
+					{
+						TF.clear();
+					}
+				}
+				else
+				{
+					Alert update = new Alert(Alert.AlertType.WARNING);
+					update.setHeaderText("Invalid Entry");
+					update.setContentText("The value entered was not yes or no");
+					Optional<ButtonType> result =update.showAndWait();
+					if(result.get() == ButtonType.OK)
+					{
+						TF.clear();
+					}
 				}
 			}
 		});
@@ -254,10 +288,9 @@ public class BackProgram extends Screen
 		}
 		else
 		{
-			clearB.setDisable(false);
 			TALocation.setVisible(true);
 			TALog.setVisible(true);
-			TABase.appendText("\nEnemy Sigheted");
+			TABase.clear();
 			PrimtiveStike();
 			moveMissions();
 		}
@@ -273,7 +306,6 @@ public class BackProgram extends Screen
 		{
 			EnemyParty = 1;
 		}
-
 		if(combatTimer != 0)
 		{
 			Enemymove();
@@ -290,9 +322,7 @@ public class BackProgram extends Screen
 
 	public static void attackMission()
 	{
-		TF.clear();
-		TABase.clear();
-		if(enemyCounter == 0)
+		if(enemyCounter <= 0)
 		{
 			TABase.appendText("\nAll Enmies Killed");
 			coverType = 0;
@@ -302,20 +332,19 @@ public class BackProgram extends Screen
 			PlayerWeapon = PlayerRollWeapon;
 			start();
 		}
-		else if (enemyCounter != 0)
+		else if (enemyCounter != 0 && enemyCounter > 0 && result != 3)
 		{
-			TABase.appendText("-------------------------------------------------------------");
+			TABase.clear();
+			TF.clear();
 			TABase.appendText("\nEnimes: "+enemyCounter+"\nAllies: "+AllyCount);
-			TABase.appendText("\nType 'Combat' to Attack \nType 'Stats' for Status\nType 'Heal' to heal a small amount");
+			TABase.appendText("\nType 'Combat' to Attack\nType 'Heal' to heal a small amount");
+			displayStatus();
 			proceedB.setOnAction((e) ->
 			{
 				if(TF.getText().equalsIgnoreCase("Combat"))
 				{
+					TALog.clear();
 					combatCombo();
-				}
-				else if(TF.getText().equalsIgnoreCase("Stats"))
-				{
-					displayStatus();
 				}
 				else if(TF.getText().equalsIgnoreCase("Heal"))
 				{
@@ -323,13 +352,27 @@ public class BackProgram extends Screen
 				}
 				else
 				{
-					Alert update = new Alert(Alert.AlertType.WARNING);
-					update.setHeaderText("Invalid Entry b");
-					update.setContentText("Value entered is null or the text entered was not Combat, Stats or Heal");
-					Optional<ButtonType> result =update.showAndWait();
-					if(result.get() == ButtonType.OK)
+					if(TF.getText().isEmpty())
 					{
-						TF.clear();
+						Alert update = new Alert(Alert.AlertType.WARNING);
+						update.setHeaderText("Null Entry");
+						update.setContentText("There is nothing in the text field.");
+						Optional<ButtonType> result =update.showAndWait();
+						if(result.get() == ButtonType.OK)
+						{
+							TF.clear();
+						}
+					}
+					else
+					{
+						Alert update = new Alert(Alert.AlertType.WARNING);
+						update.setHeaderText("Invalid Entry");
+						update.setContentText("The value entered was not Combat or Heal.");
+						Optional<ButtonType> result =update.showAndWait();
+						if(result.get() == ButtonType.OK)
+						{
+							TF.clear();
+						}
 					}
 				}
 			});
@@ -341,12 +384,10 @@ public class BackProgram extends Screen
 		if(TrnRolls.Turn() == 1 || TrnRolls.Turn() == 2)
 		{
 			theAttacker = 1;
-			TABase.appendText("\nYou Get The Upper Hand!");
 		}
 		else
 		{
-			theAttacker = 2;
-			TABase.appendText("\nThe Enemy Gets The Upper Hand!");				
+			theAttacker = 2;			
 		}
 		return theAttacker;
 	}
@@ -435,9 +476,6 @@ public class BackProgram extends Screen
 
 	public static void EnemyAttack()
 	{
-		attackLine = 1;
-		LineGrabber();
-		attackLine = 0;
 		if(coverType == 2)
 		{
 			coverCheck = true;
@@ -497,6 +535,8 @@ public class BackProgram extends Screen
 		minDamage = 0;
 		maxDamage = 0;
 		attackDamage = 0;
+		pierceDamage = 0;
+		tempHealer = 0;
 		if(AttackType == 1 || AttackType == 2 || AttackType == 3)
 		{
 			int T1 = T1_Target.Target();
@@ -505,6 +545,7 @@ public class BackProgram extends Screen
 				TALog.appendText("\nPlayer Turn:");
 				minDamage = PlayerWeapon.getminDamage();
 				maxDamage = PlayerWeapon.getmaxDamage();
+				pierceDamage = PlayerWeapon.getpierceDamage();
 				NeutralWeapon = PlayerWeapon;
 				NeutralAmmoRoll = AmmoRoll;
 			}
@@ -513,6 +554,7 @@ public class BackProgram extends Screen
 				TALog.appendText("\nAlly Turn:");
 				minDamage = AllyWeapon.getminDamage();
 				maxDamage = AllyWeapon.getmaxDamage();
+				pierceDamage = AllyWeapon.getpierceDamage();
 				NeutralWeapon = AllyWeapon;
 				NeutralAmmoRoll =  AllyAmmoRoll;
 			}
@@ -521,6 +563,7 @@ public class BackProgram extends Screen
 				TALog.appendText("\nAlly Turn:");
 				minDamage = Ally_2Weapon.getminDamage();
 				maxDamage = Ally_2Weapon.getminDamage();
+				pierceDamage = Ally_2Weapon.getpierceDamage();
 				NeutralWeapon = Ally_2Weapon;
 				NeutralAmmoRoll = Ally_2AmmoRoll;
 			}
@@ -561,30 +604,33 @@ public class BackProgram extends Screen
 				TALog.appendText("\nTargeting Enemy");
 			}		
 		}
-		if(AttackType == 4 || AttackType == 5 || AttackType == 6)
+		else if(AttackType == 4 || AttackType == 5 || AttackType == 6)
 		{	
 			int T2 = T2_Target.Target();
 			if(AttackType == 4)
 			{
-				TALog.appendText("\nEnemy #1 Turn");
+				TALog.appendText("\nEnemy #1 Turn:");
 				minDamage = EnemyWeapon.getminDamage();
 				maxDamage = EnemyWeapon.getminDamage();
+				pierceDamage = EnemyWeapon.getpierceDamage();
 				NeutralWeapon = EnemyWeapon;
 				NeutralAmmoRoll = EnemyAmmoRoll;	
 			}
 			else if(AttackType == 5)
 			{
-				TALog.appendText("\nEnemy #2 Turn");
+				TALog.appendText("\nEnemy #2 Turn:");
 				minDamage = EnemyUnitWeapon.getminDamage();
 				maxDamage = EnemyUnitWeapon.getmaxDamage();
+				pierceDamage = EnemyUnitWeapon.getpierceDamage();
 				NeutralWeapon = EnemyUnitWeapon;
 				NeutralAmmoRoll = EnemyAmmoUnitRoll;
 			}
 			else if(AttackType == 6)
 			{
-				TALog.appendText("\nEnemy #3 Turn");
+				TALog.appendText("\nEnemy #3 Turn:");
 				minDamage = EnemyUnit_2Weapon.getminDamage();
 				maxDamage = EnemyUnit_2Weapon.getmaxDamage();
+				pierceDamage = EnemyUnit_2Weapon.getpierceDamage();
 				NeutralWeapon = EnemyUnit_2Weapon;
 				NeutralAmmoRoll = EnemyAmmoUnit_2Roll;	
 			}
@@ -635,8 +681,15 @@ public class BackProgram extends Screen
 		{
 			if(NeutralWeapon.getRange() == 1) 
 			{
-				if(AccRolls.Accuracy() == 3 || AccRolls.Accuracy() == 9)
+				if(coverCheck == true && MakeCover.getCoverHealth() != 0 && AccRolls.Accuracy() == 3 || AccRolls.Accuracy() == 9)
 				{
+					Hit = false;
+					TALog.appendText("\nCover damaged!");
+				}
+				else if(coverCheck == false &&  AccRolls.Accuracy() == 3 || AccRolls.Accuracy() == 9)
+				{
+					// 02/15 = miss
+					// 13/15 = hit
 					Hit = false;
 				}
 				else
@@ -646,13 +699,23 @@ public class BackProgram extends Screen
 			}
 			else if(NeutralWeapon.getRange() > 1)
 			{
-				if(coverCheck == true && MakeCover.getCoverHealth() != 0 && AccRolls.Accuracy() == 4 || AccRolls.Accuracy() == 6)
+				if(coverCheck == true && MakeCover.getCoverHealth() != 0 && 
+						AccRolls.Accuracy() == 1 || AccRolls.Accuracy() == 2 || AccRolls.Accuracy() == 3 ||
+						AccRolls.Accuracy() == 1 || AccRolls.Accuracy() == 2 || AccRolls.Accuracy() == 3 ||
+						AccRolls.Accuracy() == 1 || AccRolls.Accuracy() == 2 || AccRolls.Accuracy() == 3 )
 				{
+					// 09/15 = miss
+					// 06/15 = hit
 					Hit = false;
 					MakeCover.DamageCover();
+					TALog.appendText("\nCover damaged!");
 				} 
-				else if(coverCheck == false && AccRolls.Accuracy() == 2 || AccRolls.Accuracy() == 4 || AccRolls.Accuracy() == 6 || AccRolls.Accuracy() == 8)
+				else if(coverCheck == false && 
+						AccRolls.Accuracy() == 2 || AccRolls.Accuracy() == 4 || AccRolls.Accuracy() == 6 ||
+						AccRolls.Accuracy() == 8 || AccRolls.Accuracy() == 10)
 				{
+					// 05/15 = miss
+					// 10/15 = hit
 					Hit = false;
 				}
 				else
@@ -669,12 +732,17 @@ public class BackProgram extends Screen
 				Random ramDam = new Random();
 				attackDamage = ramDam.nextInt((maxDamage-minDamage+1))+minDamage;//Generate a damage value between the min and max value
 
-				if(NeutralWeapon.getRange() > 1 && CrtRolls.Crit() == 11 || CrtRolls.Crit() == 12)
+				if(NeutralWeapon.getRange() == 2 && CrtRolls.Crit() == 11 || CrtRolls.Crit() == 12)
 				{
 					attackDamage = attackDamage * 2;
-					TALog.appendText("A Critical Hit!");
+					TALog.appendText("\nA Critical Hit!");
 				}
-				if(ArmRolls.Save() == 1 || ArmRolls.Save() == 3 || ArmRolls.Save() == 5)
+				else if(NeutralWeapon.getRange() == 1 && CrtRolls.Crit() == 12)
+				{
+					attackDamage = attackDamage * 2;
+					TALog.appendText("\nA Critical Hit!");
+				}
+				if(ArmRolls.Save() == 1|| ArmRolls.Save() == 2 || ArmRolls.Save() == 3 || ArmRolls.Save() == 5)
 				{
 					if(NeutralStats.getArmour() <= 0)//Used if hit was armour save but no armour exists
 					{
@@ -685,6 +753,11 @@ public class BackProgram extends Screen
 					{
 						TALog.appendText("\nArmour Damage: "+attackDamage);
 						NeutralStats.damageArmour(attackDamage);
+						if(pierceDamage != 0 && (Pierce.Pierce() == 2 || Pierce.Pierce() == 4 || Pierce.Pierce() == 6))
+						{
+							TALog.appendText("\nPierce Damage: "+pierceDamage);
+							NeutralStats.damageHealth(pierceDamage);
+						}
 					}
 				}
 				else
@@ -694,7 +767,10 @@ public class BackProgram extends Screen
 				}
 
 			}
-			NeutralWeapon.Fire();//Fires Weapon
+			if(NeutralWeapon.getRange() > 1)
+			{
+				NeutralWeapon.Fire();//Fires Weapon
+			}
 		}
 		Checker();//Checks If Anything has died
 		Hit = false;//Rests Hit Boolean
@@ -718,25 +794,51 @@ public class BackProgram extends Screen
 		{
 			if(AllyStat.getHealth() <=0 || AllyStat_2.getHealth() <=0)
 			{
-				deathType = 1;
 				AllyDeath();
 			}
 		}
 		if(EnemyStats.getHealth() <= 0 || EnemyUnitStats.getHealth() <= 0 || EnemyUnit_2Stats.getHealth() <=0)
 		{
-			deathType = 2;
 			EnemyKilled();
 		}
 	}
 
 	public static void tempHeal()
 	{
-		int quadhp = PlayerStatsRoll.getHealth() /4;
-		int quadhp1 = AllyStatRoll.getHealth() /4;
-		int quadhp2 = AllyStat_2Roll.getHealth() /4;
-		PlayerStats.HealHp(quadhp);
-		AllyStat.HealHp(quadhp1);
-		AllyStat_2.HealHp(quadhp2);
+		TF.clear();
+		if(tempHealer == 0)
+		{
+			int quadhp = PlayerStatsRoll.getHealth() /4;
+			PlayerStats.addHp(quadhp);
+			if(PlayerStats.getHealth() > PlayerStatsRoll.getHealth())
+			{
+				PlayerStats.RestoreHp(PlayerStatsRoll.getHealth());
+			}
+
+			if(AllyCount >= 1)
+			{
+				int quadhp1 = AllyStatRoll.getHealth() /4;
+				AllyStat.addHp(quadhp1);
+				if(AllyStat.getHealth() > AllyStatRoll.getHealth())
+				{
+					AllyStat.RestoreHp(AllyStatRoll.getHealth());
+				}
+			}
+			if(AllyCount == 2)
+			{
+				int quadhp2 = AllyStat_2Roll.getHealth() /4;
+				AllyStat_2.addHp(quadhp2);
+				if(AllyStat_2.getHealth() > AllyStat_2Roll.getHealth())
+				{
+					AllyStat_2.RestoreHp(AllyStat_2Roll.getHealth());
+				}
+			}
+			tempHealer = 1;
+		}
+		else
+		{
+			TABase.appendText("\nYou have already healed this turn");
+		}
 	}
 
 	public static void barracks()
@@ -789,33 +891,54 @@ public class BackProgram extends Screen
 		TF.clear();
 		TABase.clear();
 		TABase.appendText("Set Enemy Count >> ");
-		proceedB.setOnAction((e) ->
-		{
-			String hap = TF.getText();
+		proceedB.setOnAction((i) ->
+		{				
 			try
 			{
+				String hap = TF.getText();
 				enemyCounter = Integer.parseInt(hap);
-				if(enemyCounter <= 0)
+				if(enemyCounter > 0)
 				{
-					TF.clear();
+					randomEnemy();			
 				}
-				else
+				else if(TF.getText().contains("-") || enemyCounter == 0)
 				{
-					randomEnemy();
+					Alert update = new Alert(Alert.AlertType.WARNING);
+					update.setHeaderText("Null Entry");
+					update.setContentText("No values less or equal to zero are accpeted.");
+					Optional<ButtonType> result =update.showAndWait();
+					if(result.get() == ButtonType.OK)
+					{
+						TF.clear();
+					}
 				}
 			}
 			catch(NumberFormatException ex)
 			{
-				Alert update = new Alert(Alert.AlertType.WARNING);
-				update.setHeaderText("Invalid Entry c");
-				update.setContentText("Value entered is null or not equal to values one screen");
-				Optional<ButtonType> result =update.showAndWait();
-				if(result.get() == ButtonType.OK)
+				if(TF.getText().isEmpty())
 				{
-					TF.clear();
+					Alert update = new Alert(Alert.AlertType.WARNING);
+					update.setHeaderText("Null Entry");
+					update.setContentText("There is nothing in the text field.");
+					Optional<ButtonType> result =update.showAndWait();
+					if(result.get() == ButtonType.OK)
+					{
+						TF.clear();
+					}
+				}
+				else
+				{
+					Alert update = new Alert(Alert.AlertType.WARNING);
+					update.setHeaderText("Invalid Entry");
+					update.setContentText("Only numbers are accepted.");
+					Optional<ButtonType> result =update.showAndWait();
+					if(result.get() == ButtonType.OK)
+					{
+						TF.clear();
+					}
 				}
 			}
-		});		
+		});	
 	}
 
 	public static void randomEnemy()
@@ -837,13 +960,27 @@ public class BackProgram extends Screen
 			}
 			else
 			{
-				Alert update = new Alert(Alert.AlertType.WARNING);
-				update.setHeaderText("Invalid Entry d");
-				update.setContentText("Only Value accepted is yes or no");
-				Optional<ButtonType> result =update.showAndWait();
-				if(result.get() == ButtonType.OK)
+				if(TF.getText().isEmpty())
 				{
-					TF.clear();
+					Alert update = new Alert(Alert.AlertType.WARNING);
+					update.setHeaderText("Null Entry");
+					update.setContentText("There is nothing in the text field.");
+					Optional<ButtonType> result =update.showAndWait();
+					if(result.get() == ButtonType.OK)
+					{
+						TF.clear();
+					}
+				}
+				else
+				{
+					Alert update = new Alert(Alert.AlertType.WARNING);
+					update.setHeaderText("Invalid Entry");
+					update.setContentText("Only value accpeted is yes or no.");
+					Optional<ButtonType> result =update.showAndWait();
+					if(result.get() == ButtonType.OK)
+					{
+						TF.clear();
+					}
 				}
 			}
 		});
@@ -852,44 +989,97 @@ public class BackProgram extends Screen
 	public static void EnemyMaker()
 	{
 		TF.clear();
+		TABase.clear();
 		if(randFlag == 1)
 		{
 			Random RamEnemy = new Random();
 			Random = RamEnemy.nextInt(7)+1;
 			TABase.clear();
-			bossMaker();
+			if(enemyCounter == 1 || Random == 7 || Random == 3)
+			{
+				moop();
+			}
+			else
+			{
+				bossMaker();
+			}
 		}
 		else if(randFlag == 0)
 		{
-			TABase.appendText("-------------------------------------------------------------");
-			TABase.appendText("\n|-Number-|-Name-|-Health-|-Armour-|-Damage-|-Range-|-Rounds-|");
 			TABase.appendText("\nEnemy List:");
-			TABase.appendText("\n| 1 | Traitors | 40 | 40 | 4-7 | Ranged (2) | 7 |");
-			TABase.appendText("\n| 2 | Pointy Ears | 20 | 15 | 5-8  | Ranged (2) | 5 |");
-			TABase.appendText("\n| 3 | Green Ones* | 15 | 5 | 3-6 | Melee (1) | - |");
-			TABase.appendText("\n| 4 | Hungry Ones | 20 | 20 | 7-10 | Melee (1) | - |");
-			TABase.appendText("\n| 5 | Metal Skeletons | 30 | 50 | 4-7 | Ranged (2) | 6 |");
-			TABase.appendText("\n| 6 | Blue Shooters | 15 | 15 | 11-14 | Ranged (2) | 10 ");
-			TABase.appendText("\n| 7 | Fleshy Ones* | 20 | 0 | 11-14 | Ranged (2) | 10 ");;
+			TABase.appendText("\n|-Number-|-Name-|-Health-|-Armour-|-Damage-|-Pierce-|-Range-|-Rounds-|");
+			TABase.appendText("\n| 1 | Traitors | 40 | 40 | 8-10 | 5 | Ranged | 7 |");
+			TABase.appendText("\n| 2 | Pointy Ears | 20 | 15 | 9-11 | 6 | Ranged | 5 |");
+			TABase.appendText("\n| 3 | Green Ones* | 15 | 5 | 6-8 | 0 | Melee | - |");
+			TABase.appendText("\n| 4 | Hungry Ones | 20 | 20 | 10-14 | 0 | Melee | - |");
+			TABase.appendText("\n| 5 | Metal Skeletons | 30 | 50 | 7-12 | 8 | Ranged | 6 |");
+			TABase.appendText("\n| 6 | Blue Shooters | 15 | 15 | 11-14 | 0 | Ranged | 10 |");
+			TABase.appendText("\n| 7 | Fleshy Ones* | 25 | 0 | 4-7 | 4 | Melee | 0 |");
 			TABase.appendText("\n *-No boss but double enemy Amount");
 			proceedB.setOnAction((e) ->
 			{
-				if(TF.getText().equals("1") || TF.getText().equals("2") || TF.getText().equals("3") || TF.getText().equals("4") || TF.getText().equals("5") || TF.getText().equals("6") || TF.getText().equals("7"))
+				try
 				{
 					String leop = TF.getText();
 					Random = Integer.parseInt(leop);
-					TABase.clear();
-					bossMaker();
-				}
-				else
-				{
-					Alert update = new Alert(Alert.AlertType.WARNING);
-					update.setHeaderText("Invalid Entry e");
-					update.setContentText("Value entered is null or not equal to values one screen");
-					Optional<ButtonType> result =update.showAndWait();
-					if(result.get() == ButtonType.OK)
+					if((Random > 0 && Random <= 7) && !TF.getText().contains("-"))
+					{		
+						TABase.clear();
+						if(enemyCounter == 1 || Random == 7 || Random == 3)
+						{
+							moop();
+						}
+						else
+						{
+							bossMaker();
+						}	
+					}
+					else if(Random > 7)
 					{
-						TF.clear();
+						Alert update = new Alert(Alert.AlertType.WARNING);
+						update.setHeaderText("Null Value");
+						update.setContentText("No value greater than seven is accepted.");
+						Optional<ButtonType> result =update.showAndWait();
+						if(result.get() == ButtonType.OK)
+						{
+							TF.clear();
+						}
+					}
+					else if(Random <= 0)
+					{
+						Alert update = new Alert(Alert.AlertType.WARNING);
+						update.setHeaderText("Null Value");
+						update.setContentText("No values less or equal to zero are accpeted.");
+						Optional<ButtonType> result =update.showAndWait();
+						if(result.get() == ButtonType.OK)
+						{
+							TF.clear();
+						}
+					}
+				}
+				catch(NumberFormatException ex)
+				{
+					if(TF.getText().isEmpty())
+					{
+						Alert update = new Alert(Alert.AlertType.WARNING);
+						update.setHeaderText("Null Entry");
+						update.setContentText("There is nothing in the text field.");
+						Optional<ButtonType> result =update.showAndWait();
+						if(result.get() == ButtonType.OK)
+						{
+							TF.clear();
+						}
+					}
+					else
+					{
+						Alert update = new Alert(Alert.AlertType.WARNING);
+						update.setHeaderText("Invalid Entry");
+						update.setContentText("Only numbers are accepted.");
+						Optional<ButtonType> result =update.showAndWait();
+						if(result.get() == ButtonType.OK)
+						{
+							TF.clear();
+						}
 					}
 				}
 			});
@@ -899,11 +1089,6 @@ public class BackProgram extends Screen
 	public static void bossMaker()
 	{
 		TF.clear();
-		if(enemyCounter == 1 || Random == 7 || Random == 3)
-		{
-			moop();
-		}
-
 		if(bossCounter==0)
 		{
 			TABase.appendText("Do You want a boss to be made?");
@@ -919,8 +1104,13 @@ public class BackProgram extends Screen
 		}
 		else if(bossCounter==3)
 		{
-			TABase.appendText("\nBoss Damage bonus->");
+			TABase.appendText("\nBoss Minimum Damage bonus->");
 		}
+		else if(bossCounter==4)
+		{
+			TABase.appendText("\nBoss Max Damage bonus->");
+		}
+		
 		if(bossCounter <= 4)
 		{
 			proceedB.setOnAction((o)->
@@ -940,73 +1130,233 @@ public class BackProgram extends Screen
 					bossCounter ++;
 					bossMaker();
 				}
-				else if(bossCounter == 1 && !TF.getText().contains("-"))
+				else if(bossCounter == 1)
 				{		
-					String hp = TF.getText();
 					try
-					{
+					{	
+						String hp = TF.getText();
 						bossHP = Integer.parseInt(hp);
-						bossMaker();
-						bossCounter ++;
+						if(bossHP > 0)
+						{
+							bossCounter ++;
+							bossMaker();
+						}
+						else if(bossHP <= 0)
+						{
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Null Value");
+							update.setContentText("Values less or equal to zero are not accpeted.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
+						}
 					}
 					catch(NumberFormatException ex)
 					{
-						Alert update = new Alert(Alert.AlertType.WARNING);
-						update.setHeaderText("Invalid Entry BossHP");
-						update.setContentText("Value entered is null or not equal to values one screen");
-						Optional<ButtonType> result =update.showAndWait();
-						if(result.get() == ButtonType.OK)
+						if(TF.getText().isEmpty())
 						{
-							TF.clear();
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Null Entry");
+							update.setContentText("There is nothing in the text field.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
+						}
+						else
+						{
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Invalid Entry");
+							update.setContentText("Only numbers are accepted.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
 						}
 					}
 				}
-				else if(bossCounter == 2 && !TF.getText().contains("-"))
+				else if(bossCounter == 2)
 				{
-					String arm = TF.getText();
 					try
-					{
+					{	
+						String arm = TF.getText();
 						bossArmour = Integer.parseInt(arm);
-						bossCounter ++;
-						bossMaker();
+						if(bossArmour > 0)
+						{
+							bossCounter ++;
+							bossMaker();
+						}
+						else if(bossArmour <= 0)
+						{
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Null Value");
+							update.setContentText("Values less or equal to zero are not accpeted.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
+						}
 					}
 					catch(NumberFormatException ex)
 					{
-						Alert update = new Alert(Alert.AlertType.WARNING);
-						update.setHeaderText("Invalid Entry BossArmour");
-						update.setContentText("Value entered is null or not equal to values one screen or negative value was added");
-						Optional<ButtonType> result =update.showAndWait();
-						if(result.get() == ButtonType.OK)
+						if(TF.getText().isEmpty())
 						{
-							TF.clear();
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Null Entry");
+							update.setContentText("There is nothing in the text field.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
+						}
+						else
+						{
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Invalid Entry");
+							update.setContentText("Only numbers are accepted.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
 						}
 					}
 				}
-				else if(bossCounter == 3 && !TF.getText().contains("-"))
+				else if(bossCounter == 3)
 				{
-					String dam = TF.getText();
 					try
-					{
-						bossMinAttack = Integer.parseInt(dam);
-						moop();
+					{	
+						String dam = TF.getText();
+						bossMinAttack = Integer.parseInt(dam);		
+						if(bossMinAttack > 0)
+						{
+							bossCounter ++;
+							bossMaker();
+						}
+						else if(bossMinAttack <= 0)
+						{
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Null Value");
+							update.setContentText("Values less or equal to zero are not accpeted.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
+						}
 					}
 					catch(NumberFormatException ex)
 					{
-						Alert update = new Alert(Alert.AlertType.WARNING);
-						update.setHeaderText("Invalid Entry BossDamage");
-						update.setContentText("Value entered is null or not equal to values one screen");
-						Optional<ButtonType> result =update.showAndWait();
-						if(result.get() == ButtonType.OK)
+						if(TF.getText().isEmpty())
 						{
-							TF.clear();
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Null Entry");
+							update.setContentText("There is nothing in the text field.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
+						}
+						else
+						{
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Invalid Entry");
+							update.setContentText("Only numbers are accepted.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
+						}
+					}
+				}
+				else if(bossCounter == 4)
+				{
+					try
+					{	
+						String dam = TF.getText();
+						bossMaxAttack = Integer.parseInt(dam);		
+						if(bossMaxAttack > 0 && !(bossMaxAttack == bossMinAttack || bossMaxAttack < bossMinAttack))
+						{
+							moop();
+						}
+						else if(bossMaxAttack <= 0)
+						{
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Null Value");
+							update.setContentText("Values less or equal to zero are not accpeted.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
+						}
+						else if(bossMaxAttack == bossMinAttack)
+						{
+							Alert update = new Alert(Alert.AlertType.CONFIRMATION);
+							update.setHeaderText("Equal Attack");
+							update.setContentText("The minimum attack is the same as the maximum, are you sure?");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+								moop();
+							}
+							else
+							{
+								TF.clear();
+							}
+						}
+						else if(bossMaxAttack < bossMinAttack)
+						{
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Null Value");
+							update.setContentText("The max attack cannot be less than minimum.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
+						}
+					}
+					catch(NumberFormatException ex)
+					{
+						if(TF.getText().isEmpty())
+						{
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Null Entry");
+							update.setContentText("There is nothing in the text field.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
+						}
+						else
+						{
+							Alert update = new Alert(Alert.AlertType.WARNING);
+							update.setHeaderText("Invalid Entry");
+							update.setContentText("Only numbers are accepted.");
+							Optional<ButtonType> result =update.showAndWait();
+							if(result.get() == ButtonType.OK)
+							{
+								TF.clear();
+							}
 						}
 					}
 				}
 				else
 				{
 					Alert update = new Alert(Alert.AlertType.WARNING);
-					update.setHeaderText("Invalid Entry Boss Yes or No");
-					update.setContentText("Value entered is null or not equal to values one screen");
+					update.setHeaderText("Invalid Entry");
+					update.setContentText("Yes or No are the only accpeted word");
 					Optional<ButtonType> result =update.showAndWait();
 					if(result.get() == ButtonType.OK)
 					{
@@ -1023,38 +1373,38 @@ public class BackProgram extends Screen
 		if(Random == 1)
 		{
 			BuildEnemyStats = new Stats(40,40);
-			BuildEnemyWeapon = new WeaponList("Evil Bolter",4,7,2,7);
+			BuildEnemyWeapon = new WeaponList("Evil Bolter",8,10,5,2,7);
 		}
 		else if(Random == 2)
 		{
 			BuildEnemyStats = new Stats(20,15);
-			BuildEnemyWeapon = new WeaponList("Thin Gun",5,8,2,5);
+			BuildEnemyWeapon = new WeaponList("Thin Gun",9,11,6,2,5);
 		}
 		else if(Random == 3)
 		{
 			BuildEnemyStats = new Stats(15,5);
-			BuildEnemyWeapon = new WeaponList("Weird Club",3,6,1,0);
+			BuildEnemyWeapon = new WeaponList("Weird Club",6,8,0,1,0);
 			enemyCounter = enemyCounter*2;
 		}
 		else if(Random == 4)
 		{
 			BuildEnemyStats = new Stats(20,20);
-			BuildEnemyWeapon = new WeaponList("Sharp Claws",7,10,1,0);
+			BuildEnemyWeapon = new WeaponList("Sharp Claws",10,14,0,1,0);
 		}
 		else if(Random == 5)
 		{
 			BuildEnemyStats = new Stats(30,50);
-			BuildEnemyWeapon = new WeaponList("Green Lazers",4,7,2,6);
+			BuildEnemyWeapon = new WeaponList("Green Lazers",7,12,8,2,10);
 		}
 		else if(Random == 6)
 		{
 			BuildEnemyStats = new Stats(15,15);
-			BuildEnemyWeapon = new WeaponList("Wat Beam",11,14,2,10);
+			BuildEnemyWeapon = new WeaponList("Wat Beam",11,14,0,2,10);
 		}
 		else if(Random == 7)
 		{
-			BuildStats = new Stats(20,0);
-			BuildEnemyWeapon = new WeaponList("Fleshy Punch",2,5,1,0);
+			BuildStats = new Stats(25,0);
+			BuildEnemyWeapon = new WeaponList("Fleshy Punch",4,7,4,1,0);
 			enemyCounter = enemyCounter*2;
 		}
 		//Builds First Enemy
@@ -1101,17 +1451,26 @@ public class BackProgram extends Screen
 			TABase.appendText("\nEnter Name >> ");
 			proceedB.setOnAction((e) ->
 			{
-				if(!TF.getText().matches("[0-9]+"))//The text does not contain any numbers
+				if(TF.getText().matches("[a-zA-Z]+") && !TF.getText().isEmpty())//The text does not contain any numbers
 				{
-					PlayerName = TF.getText();
-					BuildType = 1;
 					statBuilder();
+				}
+				else if(TF.getText().isEmpty())
+				{
+					Alert update = new Alert(Alert.AlertType.WARNING);
+					update.setHeaderText("Null Entry");
+					update.setContentText("There is nothing in the text field");
+					Optional<ButtonType> result =update.showAndWait();
+					if(result.get() == ButtonType.OK)
+					{
+						TF.clear();
+					}
 				}
 				else
 				{
 					Alert update = new Alert(Alert.AlertType.WARNING);
-					update.setHeaderText("Invalid Entry k");
-					update.setContentText("Value entered is null or has numbers");
+					update.setHeaderText("Invalid Entry");
+					update.setContentText("Only letters are accpeted (a-z)");
 					Optional<ButtonType> result =update.showAndWait();
 					if(result.get() == ButtonType.OK)
 					{
@@ -1160,10 +1519,21 @@ public class BackProgram extends Screen
 				BuildStats = new Stats (40,40);
 				weaponBuilder();
 			}
+			else if(TF.getText().isEmpty())
+			{
+				Alert update = new Alert(Alert.AlertType.WARNING);
+				update.setHeaderText("Null Entry");
+				update.setContentText("There is nothing in the text field");
+				Optional<ButtonType> result =update.showAndWait();
+				if(result.get() == ButtonType.OK)
+				{
+					TF.clear();
+				}
+			} 
 			else 
 			{
 				Alert update = new Alert(Alert.AlertType.WARNING);
-				update.setHeaderText("Invalid Entry l");
+				update.setHeaderText("Invalid Entry");
 				update.setContentText("Value entered is null or the value entered is not 1,2 or 3");
 				Optional<ButtonType> result =update.showAndWait();
 				if(result.get() == ButtonType.OK)
@@ -1171,7 +1541,6 @@ public class BackProgram extends Screen
 					TF.clear();
 				}
 			}
-
 		});
 	}
 
@@ -1180,38 +1549,38 @@ public class BackProgram extends Screen
 
 		TABase.clear();
 		TF.clear();
-		TABase.appendText("|-Name-|-Damage-|-Range-|-Rounds-|");
-		TABase.appendText("\n| Power Sword | 5-8 | Melee | 0 |");
-		TABase.appendText("\n| Bolter | 2-5 | Ranged | 6 |");
-		TABase.appendText("\n| Shotgun | 4-7 | Ranged | 4 |");
-		TABase.appendText("\n| Sniper Bolter | 9-12 | Ranged | 1 |");
-		TABase.appendText("\n| Power Hammer | 6-9 | Melee | 0 |");
+		TABase.appendText("|-Name-|-Damage-|-Pierce-|-Range-|-Rounds-|");
+		TABase.appendText("\n| Sword | 10-13 | 5 | Melee | 0 |");
+		TABase.appendText("\n| Bolter | 7-9 | 4 | Ranged | 8 |");
+		TABase.appendText("\n| Shotgun | 8-13 | 0 | Ranged | 6 |");
+		TABase.appendText("\n| Sniper Bolter | 9-12 | 8 | Ranged | 1 |");
+		TABase.appendText("\n| Hammer | 12-16 | 0 | Melee | 0 |");
 		TABase.appendText("\nEnter name of the weapon >> ");
 		proceedB.setOnAction((e) ->
 		{
-			if(TF.getText().equalsIgnoreCase("Power Sword"))
+			if(TF.getText().equalsIgnoreCase("Sword"))
 			{
-				BuildWeapon = new WeaponList("Power Sword",5,8,1,0);
+				BuildWeapon = new WeaponList("Power Sword",10,13,5,1,0);
 				buildType();
 			}
 			else if(TF.getText().equalsIgnoreCase("Bolter"))
 			{
-				BuildWeapon = new WeaponList("Bolter",2,5,2,6);
+				BuildWeapon = new WeaponList("Bolter",7,9,4,2,8);
 				buildType();
 			}
 			else if(TF.getText().equalsIgnoreCase("Shotgun"))
 			{
-				BuildWeapon = new WeaponList("Shotgun",4,7,2,4);
+				BuildWeapon = new WeaponList("Shotgun",8,13,0,2,6);
 				buildType();
 			}
 			else if(TF.getText().equalsIgnoreCase("Sniper Bolter"))
 			{
-				BuildWeapon = new WeaponList("Sniper Bolter",9,12,2,1);
+				BuildWeapon = new WeaponList("Sniper Bolter",9,12,8,2,1);
 				buildType();
 			}
-			else if(TF.getText().equalsIgnoreCase("Power Hammer"))
+			else if(TF.getText().equalsIgnoreCase("Hammer"))
 			{
-				BuildWeapon = new WeaponList("Power Hammer",6,9,1,0);
+				BuildWeapon = new WeaponList("Hammer",12,16,0,1,0);
 				buildType();
 			}
 			else
@@ -1230,6 +1599,8 @@ public class BackProgram extends Screen
 
 	public static void PlayerDeath()//When Play dies this class is activated
 	{
+		TF.clear();
+		TABase.clear();
 		TABase.appendText("\nYou Died!");
 		result = 3;
 		try 
@@ -1242,25 +1613,23 @@ public class BackProgram extends Screen
 		}
 	}
 
-	public static void AllyDeath()	//When AlLy dies, checks which ally has 0 or less health and resets the stats and reduces ally count
+	public static void AllyDeath()//When AlLy dies, checks which ally has 0 or less health and resets the stats and reduces ally count
 	{
 		if(AllyStat.getHealth() <=0)
 		{
 			TABase.appendText("/n"+AllyName+" Has Fallen!");
-			LineGrabber();
 			AllyName = null;
 			AllyStat = new Stats (0,0);
-			AllyWeapon = new WeaponList(null,0,0,0,0);
+			AllyWeapon = new WeaponList(null,0,0,0,0,0);
 			AllyCount = AllyCount - 1;
 			switcher();
 		}
 		else if (AllyStat_2.getHealth() <=0 && AllyCount == 2)
 		{
 			TABase.appendText("/n"+Ally_2Name+" Has Fallen!");
-			LineGrabber();
 			Ally_2Name = null;
 			AllyStat_2 = new Stats (0,0);
-			Ally_2Weapon = new WeaponList(null,0,0,0,0);
+			Ally_2Weapon = new WeaponList(null,0,0,0,0,0);
 			AllyCount = AllyCount - 1;
 		}
 	}
@@ -1275,33 +1644,7 @@ public class BackProgram extends Screen
 			AllyWeapon = Ally_2Weapon;
 			Ally_2Name = null;
 			AllyStat_2 = new Stats (0,0);
-			Ally_2Weapon = new WeaponList(null,0,0,0,0);
-		}
-	}
-
-	public static void LineGrabber()//Grabs a line to be used with a death of any ally/enemy
-	{
-		Random RamLine = new Random();
-		if(deathType == 1)
-		{
-			Grabber = RamLine.nextInt(9)+1;
-			Lines.GrabWord(Grabber);
-			RollLine = Lines.getWord();
-			TALog.appendText("\n"+RollLine);
-		}
-		else if(deathType == 2)
-		{
-			Grabber = RamLine.nextInt(6)+1;
-			Lines.GrabAlly(Grabber);
-			RollLine = Lines.getWord();
-			TALog.appendText("\n"+RollLine);
-		}
-		else if(attackLine == 1)
-		{
-			Grabber = RamLine.nextInt(3)+1;
-			Lines.combat(Grabber);
-			RollLine = Lines.getWord();
-			TALog.appendText("\n"+RollLine);
+			Ally_2Weapon = new WeaponList(null,0,0,0,0,0);
 		}
 	}
 
@@ -1309,33 +1652,27 @@ public class BackProgram extends Screen
 	{
 		if(EnemyStats.getHealth() <= 0)
 		{
-			TABase.appendText("\nEnemy #1 Killed");
-			LineGrabber();
 			Score = Score + 50;
 			enemyCounter = enemyCounter -1;
 			kills ++;
-			EnemyStats.HealHp(EnemyStatsRoll.getHealth());
-			EnemyStats.HealArmour(EnemyStatsRoll.getArmour());
+			EnemyStats.RestoreHp(EnemyStatsRoll.getHealth());
+			EnemyStats.RestoreArmour(EnemyStatsRoll.getArmour());
 		}
 		else if(EnemyUnitStats.getHealth() <= 0  && (EnemyParty == 1 || EnemyParty == 2))
 		{
-			TABase.appendText("\nEnemy #2 Killed");
-			LineGrabber();
 			Score = Score + 50;
 			enemyCounter = enemyCounter -1;
 			kills ++;
-			EnemyUnitStats.HealHp(EnemyUnitStatsRoll.getHealth());
-			EnemyUnitStats.HealArmour(EnemyUnitStatsRoll.getArmour());
+			EnemyUnitStats.RestoreHp(EnemyUnitStatsRoll.getHealth());
+			EnemyUnitStats.RestoreArmour(EnemyUnitStatsRoll.getArmour());
 		}
 		else if(EnemyUnit_2Stats.getHealth() <=0 && EnemyParty == 2)
 		{
-			TABase.appendText("\nEnemy #3 Killed");
-			LineGrabber();
 			Score = Score + 50;
 			enemyCounter = enemyCounter -1;
 			kills ++;
-			EnemyUnit_2Stats.HealHp(EnemyUnit_2StatsRoll.getArmour());
-			EnemyUnit_2Stats.HealArmour(EnemyUnit_2StatsRoll.getArmour());
+			EnemyUnit_2Stats.RestoreHp(EnemyUnit_2StatsRoll.getArmour());
+			EnemyUnit_2Stats.RestoreArmour(EnemyUnit_2StatsRoll.getArmour());
 		}
 		if(enemyCounter == 1 && bossIntAll == 1)
 		{
@@ -1348,47 +1685,24 @@ public class BackProgram extends Screen
 
 	public static void displayStatus()
 	{
-		TALog.appendText("\n====");
-		TALog.appendText("\n"+PlayerName);
-		TALog.appendText("\n "+PlayerStats);
-		TALog.appendText("\n===");
+		TALocation.clear();
+		TALocation.appendText(PlayerName+" "+PlayerStats+"\n"+PlayerWeapon);
+		if(AllyCount >= 1)
+		{
+			TALocation.appendText("------\n"+AllyName+" "+AllyStat+"\n"+AllyWeapon);
+		}
 		if(AllyCount == 2)
 		{
-			TALog.appendText("\n===");
-			TALog.appendText("\n"+Ally_2Name);
-			TALog.appendText("\n"+AllyStat_2);
-			TALog.appendText("\n===");
-			TALog.appendText("\n"+AllyName);
-			TALog.appendText("\n"+AllyStat);
-			TALog.appendText("\n===");
+			TALocation.appendText("------\n"+Ally_2Name+" "+AllyStat_2+"\n"+Ally_2Weapon);
 		}
-		else if(AllyCount == 1)
+		TALocation.appendText("------\nEnemy Status"+" "+EnemyStats+"\n"+EnemyWeapon);
+		if(EnemyParty >= 1)
 		{
-			TALog.appendText("\n===");
-			TALog.appendText("\n"+AllyName);
-			TALog.appendText("\n"+AllyStat);
-			TALog.appendText("\n===");
+			TALocation.appendText("------\nEnemy #2 Status"+" "+EnemyUnitStats+"\n"+EnemyUnitWeapon);
 		}
-		TALog.appendText("\n===");
-		TALog.appendText("\nEnemy Status");
-		TALog.appendText("\n"+EnemyStats);
-		TALog.appendText("\n===");
 		if(EnemyParty == 2)
 		{
-			TALog.appendText("\n===");
-			TALog.appendText("\nEnemy #3 Status");
-			TALog.appendText("\n"+EnemyUnit_2Stats);
-			TALog.appendText("\n===");
-			TALog.appendText("\nEnemy Status");
-			TALog.appendText("\n"+EnemyUnitStats);
-			TALog.appendText("\n===");
-		}
-		else if(EnemyParty == 1)
-		{
-			TALog.appendText("\n===");
-			TALog.appendText("\nEnemy #2 Status");
-			TALog.appendText("\n"+EnemyUnitStats);
-			TALog.appendText("\n===");
+			TALocation.appendText("------\nEnemy #3 Status"+" "+EnemyUnit_2Stats+"\n"+EnemyUnit_2Weapon);
 		}
 	}
 
@@ -1398,7 +1712,7 @@ public class BackProgram extends Screen
 		{
 			TF.clear();
 			TABase.clear();
-			TABase.appendText("Map size Small: 10x10 \nMap size Medium: 15x15 \nMap size Large 20x20 \nNao size Extra Large 25x25");
+			TABase.appendText("Map size Small: 10x10 \nMap size Medium: 15x15 \nMap size Large 20x20 \nMap size Extra Large 25x25");
 			TABase.appendText("\nEnter map size >> ");
 			proceedB.setOnAction((e) ->
 			{
@@ -1453,18 +1767,8 @@ public class BackProgram extends Screen
 			});
 		}
 		else if(mapCounter == 1)
-		{
-			//Generates Cover
-			if(loop == 0)
-			{
-				loop = loop + 1;
-				ObjectGenerator();
-			}
-			else
-			{
-				mapCounter = 0;
-				start();		
-			}
+		{		
+			ObjectGenerator();			
 		}
 	}
 
@@ -1475,106 +1779,143 @@ public class BackProgram extends Screen
 			MakeCrate = new Crate (0, 0, 1, 0);
 			MakeCrate.CrateXMaker(customX);
 			MakeCrate.CrateYMaker(customY);
-
 			MakeCover = new Cover (0, 0, 3);
 			MakeCover.CoverXMaker(customX);
-			MakeCover.CoverYMaker(customY);
-			System.out.println("Hoop1");
-			
+			MakeCover.CoverYMaker(customY);	
 		}		
 		if(itemCounter >= 4)
 		{
 			MakeCrate1 = new Crate (0, 0, 1, 0);
 			MakeCrate1.CrateXMaker(customX);
 			MakeCrate1.CrateYMaker(customY);
-
 			MakeCover1 = new Cover (0, 0, 3);
 			MakeCover1.CoverXMaker(customX);
 			MakeCover1.CoverYMaker(customY);
-			System.out.println("Hoop2");
 		}	
 		if(itemCounter >= 6)
 		{
 			MakeCrate2 = new Crate (0, 0, 1, 0);
 			MakeCrate2.CrateXMaker(customX);
 			MakeCrate2.CrateYMaker(customY);
-
 			MakeCover2 = new Cover (0, 0, 3);
 			MakeCover2.CoverXMaker(customX);
 			MakeCover2.CoverYMaker(customY);
-			System.out.println("Hoop3");
 		}
 		if(itemCounter == 8)
 		{
 			MakeCrate3 = new Crate (0, 0, 1, 0);
 			MakeCrate3.CrateXMaker(customX);
 			MakeCrate3.CrateYMaker(customY);
-
 			MakeCover3 = new Cover (0, 0, 3);
 			MakeCover3.CoverXMaker(customX);
 			MakeCover3.CoverYMaker(customY);
-			System.out.println("Hoop4");
 		}
-		//MapCheck();
+		MapCheck();
 	}
 
 	public static void MapCheck()
 	{
-		System.out.println("Hoop");
 		if(EnemyXLocation == baseX || EnemyXLocation == customX || EnemyYLocation == baseY || EnemyYLocation == customY || 
 				PlayerXLocation == baseX || PlayerXLocation == customX || PlayerYLocation == baseY || PlayerYLocation == customY)//Checks when the enemy or player spawn are on the edge of the map and they are sorted again if they are
 		{
 			Randomizer();
 		}
-		
-		if(itemCounter == 2 && (MakeCover.getCoverX() == baseX || MakeCover.getCoverX() == customX || MakeCover.getCoverY() == baseY || MakeCover.getCoverY() == customY || 
+		else if(itemCounter == 2 && (MakeCover.getCoverX() == baseX || MakeCover.getCoverX() == customX || MakeCover.getCoverY() == baseY || MakeCover.getCoverY() == customY || 
 				MakeCrate.getCrateX() == baseX || MakeCrate.getCrateX() == customX || MakeCrate.getCrateY() == baseY || MakeCrate.getCrateY() == customY))
 		{
 			ObjectGenerator();
 		}
-		else if(itemCounter == 2 && (MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY()))
+		else if(itemCounter == 4 && ((MakeCover.getCoverX() == baseX || MakeCover.getCoverX() == customX || MakeCover.getCoverY() == baseY || MakeCover.getCoverY() == customY || 
+				MakeCrate.getCrateX() == baseX || MakeCrate.getCrateX() == customX || MakeCrate.getCrateY() == baseY || MakeCrate.getCrateY() == customY) ||
+				(MakeCover1.getCoverX() == baseX || MakeCover1.getCoverX() == customX || MakeCover1.getCoverY() == baseY || MakeCover1.getCoverY() == customY || 
+				MakeCrate1.getCrateX() == baseX || MakeCrate1.getCrateX() == customX || MakeCrate1.getCrateY() == baseY || MakeCrate1.getCrateY() == customY)))
 		{
 			ObjectGenerator();
 		}
-		else if(itemCounter >= 4 && (MakeCover1.getCoverX() == baseX || MakeCover1.getCoverX() == customX || MakeCover1.getCoverY() == baseY || MakeCover1.getCoverY() == customY || 
-				MakeCrate1.getCrateX() == baseX || MakeCrate1.getCrateX() == customX || MakeCrate1.getCrateY() == baseY || MakeCrate1.getCrateY() == customY))
+		else if(itemCounter == 6 && ((MakeCover.getCoverX() == baseX || MakeCover.getCoverX() == customX || MakeCover.getCoverY() == baseY || MakeCover.getCoverY() == customY || 
+				MakeCrate.getCrateX() == baseX || MakeCrate.getCrateX() == customX || MakeCrate.getCrateY() == baseY || MakeCrate.getCrateY() == customY) ||
+				(MakeCover1.getCoverX() == baseX || MakeCover1.getCoverX() == customX || MakeCover1.getCoverY() == baseY || MakeCover1.getCoverY() == customY || 
+				MakeCrate1.getCrateX() == baseX || MakeCrate1.getCrateX() == customX || MakeCrate1.getCrateY() == baseY || MakeCrate1.getCrateY() == customY) ||
+				(MakeCover2.getCoverX() == baseX || MakeCover2.getCoverX() == customX || MakeCover2.getCoverY() == baseY || MakeCover2.getCoverY() == customY || 
+				MakeCrate2.getCrateX() == baseX || MakeCrate2.getCrateX() == customX || MakeCrate2.getCrateY() == baseY || MakeCrate2.getCrateY() == customY)))
 		{
 			ObjectGenerator();
 		}
-		else if(itemCounter == 4 && ((MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY())||
-				(MakeCrate1.getCrateX() == MakeCover1.getCoverX() && MakeCrate1.getCrateY() == MakeCover1.getCoverY())))
-		{
-			ObjectGenerator();
-		}
-		else if(itemCounter == 6 && (MakeCover2.getCoverX() == baseX || MakeCover2.getCoverX() == customX || MakeCover2.getCoverY() == baseY || MakeCover2.getCoverY() == customY || 
-				MakeCrate2.getCrateX() == baseX || MakeCrate2.getCrateX() == customX || MakeCrate2.getCrateY() == baseY || MakeCrate2.getCrateY() == customY))
-		{
-			ObjectGenerator();
-		}
-		else if(itemCounter == 6 && (MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY())||
-				(MakeCrate1.getCrateX() == MakeCover1.getCoverX() && MakeCrate1.getCrateY() == MakeCover1.getCoverY())||
-				(MakeCrate2.getCrateX() == MakeCover2.getCoverX() && MakeCrate2.getCrateY() == MakeCover2.getCoverY()))
-		{
-			ObjectGenerator();
-		}
-		else if(itemCounter == 8 && (MakeCover3.getCoverX() == baseX || MakeCover3.getCoverX() == customX || MakeCover3.getCoverY() == baseY || MakeCover3.getCoverY() == customY || 
-				MakeCrate3.getCrateX() == baseX || MakeCrate3.getCrateX() == customX || MakeCrate3.getCrateY() == baseY || MakeCrate3.getCrateY() == customY))
-		{
-			ObjectGenerator();
-		}
-		else if(itemCounter == 8 && (MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY())||
-				(MakeCrate1.getCrateX() == MakeCover1.getCoverX() && MakeCrate1.getCrateY() == MakeCover1.getCoverY())||
-				(MakeCrate2.getCrateX() == MakeCover2.getCoverX() && MakeCrate2.getCrateY() == MakeCover2.getCoverY())||
-				(MakeCrate3.getCrateX() == MakeCover3.getCoverX() && MakeCrate3.getCrateY() == MakeCover3.getCoverY()))
+		else if(itemCounter == 8 && (itemCounter == 6 && ((MakeCover.getCoverX() == baseX || MakeCover.getCoverX() == customX || MakeCover.getCoverY() == baseY || MakeCover.getCoverY() == customY || 
+				MakeCrate.getCrateX() == baseX || MakeCrate.getCrateX() == customX || MakeCrate.getCrateY() == baseY || MakeCrate.getCrateY() == customY) ||
+				(MakeCover1.getCoverX() == baseX || MakeCover1.getCoverX() == customX || MakeCover1.getCoverY() == baseY || MakeCover1.getCoverY() == customY || 
+				MakeCrate1.getCrateX() == baseX || MakeCrate1.getCrateX() == customX || MakeCrate1.getCrateY() == baseY || MakeCrate1.getCrateY() == customY) ||
+				(MakeCover2.getCoverX() == baseX || MakeCover2.getCoverX() == customX || MakeCover2.getCoverY() == baseY || MakeCover2.getCoverY() == customY || 
+				MakeCrate2.getCrateX() == baseX || MakeCrate2.getCrateX() == customX || MakeCrate2.getCrateY() == baseY || MakeCrate2.getCrateY() == customY) ||
+				(MakeCover3.getCoverX() == baseX || MakeCover3.getCoverX() == customX || MakeCover3.getCoverY() == baseY || MakeCover3.getCoverY() == customY || 
+				MakeCrate3.getCrateX() == baseX || MakeCrate3.getCrateX() == customX || MakeCrate3.getCrateY() == baseY || MakeCrate3.getCrateY() == customY))))
 		{
 			ObjectGenerator();
 		}
 		else
 		{
-			MapMaker();
+			objectBouncer();
 		}
+
+
+
 	}
-	
+
+	public static void objectBouncer()
+	{
+		if(itemCounter == 2 && (MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY()))
+		{
+			ObjectGenerator();
+		}
+		else if(itemCounter == 4 && (
+				(MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY())||
+				(MakeCrate1.getCrateX() == MakeCover1.getCoverX() && MakeCrate1.getCrateY() == MakeCover1.getCoverY())||
+				(MakeCrate.getCrateX() == MakeCrate1.getCrateX() && MakeCrate.getCrateY() == MakeCrate1.getCrateY())||
+				(MakeCover.getCoverX() == MakeCover1.getCoverX() && MakeCover.getCoverY() == MakeCover1.getCoverY())
+				))
+		{
+			ObjectGenerator();
+		}
+		else if(itemCounter == 6 && ((MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY())||
+				(MakeCrate1.getCrateX() == MakeCover1.getCoverX() && MakeCrate1.getCrateY() == MakeCover1.getCoverY())||
+				(MakeCrate2.getCrateX() == MakeCover2.getCoverX() && MakeCrate2.getCrateY() == MakeCover2.getCoverY())||				
+				(MakeCrate1.getCrateX() == MakeCrate.getCrateX() && MakeCrate1.getCrateY() == MakeCrate.getCrateY())||
+				(MakeCover1.getCoverX() == MakeCover.getCoverX() && MakeCover1.getCoverY() == MakeCover.getCoverY())||				
+				(MakeCrate2.getCrateX() == MakeCrate.getCrateX() && MakeCrate2.getCrateY() == MakeCrate.getCrateY())||
+				(MakeCover2.getCoverX() == MakeCover.getCoverX() && MakeCover2.getCoverY() == MakeCover.getCoverY())||				
+				(MakeCrate1.getCrateX() == MakeCrate2.getCrateX() && MakeCrate1.getCrateY() == MakeCrate2.getCrateY())||
+				(MakeCover1.getCoverX() == MakeCover2.getCoverX() && MakeCover1.getCoverY() == MakeCover2.getCoverY())
+				))
+		{
+			ObjectGenerator();
+		}
+		else if(itemCounter == 8 && ((MakeCrate.getCrateX() == MakeCover.getCoverX() && MakeCrate.getCrateY() == MakeCover.getCoverY())||
+				(MakeCrate1.getCrateX() == MakeCover1.getCoverX() && MakeCrate1.getCrateY() == MakeCover1.getCoverY())||
+				(MakeCrate2.getCrateX() == MakeCover2.getCoverX() && MakeCrate2.getCrateY() == MakeCover2.getCoverY())||
+				(MakeCrate3.getCrateX() == MakeCover3.getCoverX() && MakeCrate3.getCrateY() == MakeCover3.getCoverY())||				
+				(MakeCrate1.getCrateX() == MakeCrate.getCrateX() && MakeCrate1.getCrateY() == MakeCrate.getCrateY())||
+				(MakeCover1.getCoverX() == MakeCover.getCoverX() && MakeCover1.getCoverY() == MakeCover.getCoverY())||				
+				(MakeCrate2.getCrateX() == MakeCrate.getCrateX() && MakeCrate2.getCrateY() == MakeCrate.getCrateY())||
+				(MakeCover2.getCoverX() == MakeCover.getCoverX() && MakeCover2.getCoverY() == MakeCover.getCoverY())||			
+				(MakeCrate3.getCrateX() == MakeCrate.getCrateX() && MakeCrate3.getCrateY() == MakeCrate.getCrateY())||
+				(MakeCover3.getCoverX() == MakeCover.getCoverX() && MakeCover3.getCoverY() == MakeCover.getCoverY())||
+				(MakeCrate2.getCrateX() == MakeCrate1.getCrateX() && MakeCrate2.getCrateY() == MakeCrate1.getCrateY())||
+				(MakeCover2.getCoverX() == MakeCover1.getCoverX() && MakeCover2.getCoverY() == MakeCover1.getCoverY())||
+				(MakeCrate3.getCrateX() == MakeCrate1.getCrateX() && MakeCrate3.getCrateY() == MakeCrate1.getCrateY())||
+				(MakeCover3.getCoverX() == MakeCover1.getCoverX() && MakeCover3.getCoverY() == MakeCover1.getCoverY())||
+				(MakeCrate3.getCrateX() == MakeCrate2.getCrateX() && MakeCrate3.getCrateY() == MakeCrate2.getCrateY())||
+				(MakeCover3.getCoverX() == MakeCover2.getCoverX() && MakeCover3.getCoverY() == MakeCover2.getCoverY())
+				))
+		{
+			ObjectGenerator();
+		}
+		else
+		{
+			start();	
+		}
+
+	}
+
 	public static void Randomizer()//Scrambles both player and the enemy locations
 	{
 		Random randomY = new Random ();
@@ -1588,96 +1929,59 @@ public class BackProgram extends Screen
 		MapCheck();
 	}
 
-	public static void BoundryCheck()
-	{
-		if(EnemyXLocation == baseX)//Checks when the enemy spawn to move it away from the edges of the map
-		{
-			EnemyXLocation = EnemyXLocation + 1;
-			Enemymove();
-		}
-		else if(EnemyXLocation == customX)
-		{
-			EnemyXLocation = EnemyXLocation - 1;
-			Enemymove();
-		}
-		else if(EnemyYLocation == baseY)
-		{
-			EnemyYLocation = EnemyYLocation + 1;
-			Enemymove();
-		}
-		else if(EnemyYLocation == customY)
-		{
-			EnemyYLocation = EnemyYLocation - 1;
-			Enemymove();
-		}
-
-		if(PlayerXLocation == baseX)//Checks if the player reaches the limits of the map they are moved back one 
-		{
-			TABase.appendText("\nYou cannot go any futher right");
-			PlayerXLocation = PlayerXLocation + 1;
-			Move();
-		}
-		else if(PlayerXLocation == customX)
-		{
-			TABase.appendText("\nYou cannot go any futher left");
-			PlayerXLocation = PlayerXLocation - 1;
-			Move();
-		}
-		else if(PlayerYLocation == baseY)
-		{
-			TABase.appendText("\nYou cannot go any futher down");
-			PlayerYLocation = PlayerYLocation + 1;
-			Move();
-		}
-		else if(PlayerYLocation == customY)
-		{
-			TABase.appendText("\nYou cannot go any futher up");
-			PlayerYLocation = PlayerYLocation - 1;
-			Move();
-		}
-	}
-
 	public static void Move()
 	{
 		TF.clear();
-		TABase.clear();
 		//Allows the player to move in 4 directions 
-		TABase.appendText("-Move up- \n-Move down- \n-Move left- \n-Move right-");
+		TABase.appendText("Timer: "+combatTimer);
+		TABase.appendText("\n-Move up- \n-Move down- \n-Move left- \n-Move right-");
 		TABase.appendText("\nEnter movement choice >> ");
 		proceedB.setOnAction((e) ->
 		{		
 			if(TF.getText().equalsIgnoreCase("move up"))
 			{
+				TABase.clear();
+				TF.clear();
 				PlayerYLocation = PlayerYLocation + 1;
-				TABase.appendText("\nYou move up");
 				BoundryCheck();//Checks if player moves towards edge of map
 				moveMissions();//Moves player back to the move mission as it causes a loop
 			}
 			else if(TF.getText().equalsIgnoreCase("move down"))
 			{
+				TABase.clear();
+				TF.clear();
 				PlayerYLocation = PlayerYLocation - 1;
-				TABase.appendText("\nYou move down");
 				BoundryCheck();
 				moveMissions();
 			}
 			else if(TF.getText().equalsIgnoreCase("move left"))
 			{
+				TABase.clear();
+				TF.clear();
 				PlayerXLocation = PlayerXLocation + 1;
-				TABase.appendText("\nYou move left");
 				BoundryCheck();
 				moveMissions();
 			}
 			else if(TF.getText().equalsIgnoreCase("move right"))
 			{
+				TABase.clear();
+				TF.clear();
 				PlayerXLocation = PlayerXLocation - 1;
-				TABase.appendText("\nYou move right");	
 				BoundryCheck();
 				moveMissions();
 			}
 			else if(TF.getText().equalsIgnoreCase("stay"))
 			{
-				PlayerXLocation = PlayerXLocation - 1;
-				TABase.appendText("\nYou stay where you are");	
+				TABase.clear();
+				TF.clear();
+				moveMissions();
+			}
+			else if(TF.getText().equalsIgnoreCase("cover"))
+			{
+				PlayerXLocation = MakeCover.getCoverX();
+				PlayerYLocation = MakeCover.getCoverY();
+				TABase.clear();
+				TF.clear();
 				moveMissions();
 			}
 			else
@@ -1742,12 +2046,61 @@ public class BackProgram extends Screen
 		}
 	}
 
+	public static void BoundryCheck()
+	{
+		if(EnemyXLocation == baseX)//Checks when the enemy spawn to move it away from the edges of the map
+		{
+			EnemyXLocation = EnemyXLocation + 1;
+			Enemymove();
+		}
+		else if(EnemyXLocation == customX)
+		{
+			EnemyXLocation = EnemyXLocation - 1;
+			Enemymove();
+		}
+		else if(EnemyYLocation == baseY)
+		{
+			EnemyYLocation = EnemyYLocation + 1;
+			Enemymove();
+		}
+		else if(EnemyYLocation == customY)
+		{
+			EnemyYLocation = EnemyYLocation - 1;
+			Enemymove();
+		}
+
+		if(PlayerXLocation == baseX)//Checks if the player reaches the limits of the map they are moved back one 
+		{
+			TABase.appendText("\nYou cannot go any futher right");
+			PlayerXLocation = PlayerXLocation + 1;
+			Move();
+		}
+		else if(PlayerXLocation == customX)
+		{
+			TABase.appendText("\nYou cannot go any futher left");
+			PlayerXLocation = PlayerXLocation - 1;
+			Move();
+		}
+		else if(PlayerYLocation == baseY)
+		{
+			TABase.appendText("\nYou cannot go any futher down");
+			PlayerYLocation = PlayerYLocation + 1;
+			Move();
+		}
+		else if(PlayerYLocation == customY)
+		{
+			TABase.appendText("\nYou cannot go any futher up");
+			PlayerYLocation = PlayerYLocation - 1;
+			Move();
+		}
+	}
+
 	public static void Enemymove()//Enemy moves in a random direction, will 'bounce' if goes near a border and move another direction, if it is on the same X or Y value of a cover piece it shall move towards it
 	{
 		if(EnemyYLocation == MakeCover.getCoverY() && EnemyXLocation == MakeCover.getCoverX())
 		{
 			coverType = 2;
-			BoundryCheck();//Checks if enemy moves towards edge of map
+			//BoundryCheck();//Checks if enemy moves towards edge of map
 		}
 		else if(coverType != 2)	//Enemy will move around randomly until the coverType is equal to 2
 		{
@@ -1767,81 +2120,112 @@ public class BackProgram extends Screen
 			{
 				EnemyXLocation = EnemyXLocation - 1;
 			}
-			BoundryCheck();
+			//BoundryCheck();
 		}
 	}
 
 	public static void locationShow()//Shows location of both player and enemy as well as a map
 	{
+		TALocation.clear();
 		TALocation.appendText("\nPlayer: Y-["+PlayerYLocation+"] X-["+PlayerXLocation+"]");
 		TALocation.appendText("\nEnemy: Y-["+EnemyYLocation+"] X-["+EnemyXLocation+"]");
-		TALocation.appendText("\nCover: Y-["+MakeCover.getCoverY()+"] X-["+MakeCover.getCoverX()+"]");
-		TALocation.appendText("\nCrate: Y-["+MakeCrate.getCrateY()+"] X-["+MakeCrate.getCrateX()+"]\n");
+		if(itemCounter >= 2)
+		{
+			TALocation.appendText("\nCover 1: Y-["+MakeCover.getCoverY()+"] X-["+MakeCover.getCoverX()+"]");
+			TALocation.appendText("\nCrate 1: Y-["+MakeCrate.getCrateY()+"] X-["+MakeCrate.getCrateX()+"]");
+		}		
+		if(itemCounter >= 4)
+		{
+			TALocation.appendText("\nCover 2: Y-["+MakeCover1.getCoverY()+"] X-["+MakeCover1.getCoverX()+"]");
+			TALocation.appendText("\nCrate 2: Y-["+MakeCrate1.getCrateY()+"] X-["+MakeCrate1.getCrateX()+"]");
+		}	
+		if(itemCounter >= 6)
+		{
+			TALocation.appendText("\nCover 3: Y-["+MakeCover2.getCoverY()+"] X-["+MakeCover2.getCoverX()+"]");
+			TALocation.appendText("\nCrate 3: Y-["+MakeCrate2.getCrateY()+"] X-["+MakeCrate2.getCrateX()+"]");
+		}
+		if(itemCounter == 8)
+		{
+			TALocation.appendText("\nCover 4: Y-["+MakeCover3.getCoverY()+"] X-["+MakeCover3.getCoverX()+"]");
+			TALocation.appendText("\nCrate 4: Y-["+MakeCrate3.getCrateY()+"] X-["+MakeCrate3.getCrateX()+"]");
+		}
 	}
 
 	public static void print() throws FileNotFoundException //Prints results to the text document
 	{
 		TF.clear();
-		TABase.clear();
+		TABase.appendText("\nWould you like to go back to the menu? \nYes/No");
+		proceedB.setOnAction((e) ->
+		{
+			if(TF.getText().equalsIgnoreCase("Yes"))
+			{
+				start();	
+			}
+			else if(TF.getText().equalsIgnoreCase("No"))
+			{
+				Platform.exit();
+				System.exit(0);	
+			}
+		});
 		try
-		{	
-			PrintWriter out = new PrintWriter(theFile);
-			out.println("-----------");
+		{
+			PrintWriter printW = new PrintWriter(new BufferedWriter(new FileWriter(playerFile, true)));
+			//PrintWriter pW = new PrintWriter (playerFile);
+			printW.println("-----------");
 			if(result == 1)
 			{
-				out.println("Result: Player finished");
+				printW.println("Result: Player finished");
 			}
 			else if(result == 3)
 			{
-				out.println("Result: Player death");
+				printW.println("Result: Player death");
 			}
-			out.println("Name: "+PlayerName);
-			out.println("Score: "+Score);
-			out.println("Kills: "+kills);
-			out.println("-----------");
-			out.close();		
+			printW.println("Name: "+PlayerName);
+			printW.println("Score: "+Score);
+			printW.println("Kills: "+kills);
+			printW.println("-----------");
+			printW.close();		
 			clear();
-			start();
 		}
 		catch(Exception ex)
 		{
-			TABase.appendText("\nFile not found");
+			TABase.appendText("\nFile not found");		
 		}
 	}
 
 	public static void clear()//Clears all values
 	{
-		PlayerWeapon = new WeaponList(null,0,0,0,0);
-		PlayerRollWeapon = new WeaponList(null,0,0,0,0);
+		PlayerWeapon = new WeaponList(null,0,0,0,0,0);
+		PlayerRollWeapon = new WeaponList(null,0,0,0,0,0);
 		PlayerStats = new Stats (0,0);
 		PlayerStatsRoll = new Stats (0,0);
 		AmmoRoll = 0;
 		PlayerName = null;
 		AllyStat = new Stats (0,0);
 		AllyStatRoll = new Stats (0,0);
-		AllyWeapon = new WeaponList(null,0,0,0,0);
+		AllyWeapon = new WeaponList(null,0,0,0,0,0);
 		AllyAmmoRoll= 0;
 		AllyName = null;
 		AllyStat_2 = new Stats (0,0);
 		AllyStat_2Roll = new Stats (0,0);
-		Ally_2Weapon = new WeaponList(null,0,0,0,0);
+		Ally_2Weapon = new WeaponList(null,0,0,0,0,0);
 		Ally_2AmmoRoll = 0;
 		Ally_2Name = null;
 		AllyCount = 0;
 		statCounter = 0;
-		EnemyWeapon = new WeaponList(null,0,0,0,0);
+		EnemyWeapon = new WeaponList(null,0,0,0,0,0);
 		EnemyAmmoRoll = 0;
 		EnemyStats = new Stats (0,0);
 		EnemyParty = 0;
-		EnemyUnitWeapon = new WeaponList(null,0,0,0,0);
+		EnemyUnitWeapon = new WeaponList(null,0,0,0,0,0);
 		EnemyAmmoUnitRoll = 0;
 		EnemyUnitStats = new Stats (0,0);
 		EnemyUnitStatsRoll = new Stats (0,0);
-		EnemyUnit_2Weapon = new WeaponList(null,0,0,0,0);
+		EnemyUnit_2Weapon = new WeaponList(null,0,0,0,0,0);
 		EnemyAmmoUnit_2Roll = 0;
 		EnemyUnit_2Stats = new Stats (0,0);
 		EnemyUnit_2StatsRoll = new Stats (0,0);
-		EnemyWeaponBoss = new WeaponList(null,0,0,0,0);
+		EnemyWeaponBoss = new WeaponList(null,0,0,0,0,0);
 		EnemyAmmoBoss = 0;
 		EnemyBoss = new Stats (0,0);
 		EnemyBossRoll = new Stats (0,0);

@@ -5,7 +5,7 @@ public class Dice
 	public int Accuracy()
 	{
 		Random RamAccuracy = new Random();
-		int accuracy = RamAccuracy.nextInt(10)+1;
+		int accuracy = RamAccuracy.nextInt(15)+1;
 		return accuracy;
 	}
 	
@@ -19,28 +19,42 @@ public class Dice
 	public int Crit()
 	{
 		Random RamCrit = new Random();
-		int Crit = RamCrit.nextInt(12)+1;
-		return Crit;
+		int crit = RamCrit.nextInt(20)+1;
+		return crit;
 	}
 	
 	public int Turn()
 	{
 		Random RamTurn = new Random();
-		int Turn = RamTurn.nextInt(4)+1;
-		return Turn;
+		int turn = RamTurn.nextInt(4)+1;
+		return turn;
 	}
 	
 	public int Target()
 	{
 		Random RamTarget = new Random();
-		int Target = RamTarget.nextInt(6)+1;
-		return Target;
+		int target = RamTarget.nextInt(6)+1;
+		return target;
 	}
 	
 	public int move()
 	{
 		Random ramMove = new Random();
-		int Move = ramMove.nextInt(4)+1;
-		return Move;
+		int move = ramMove.nextInt(4)+1;
+		return move;
+	}
+	
+	public int Pierce()
+	{
+		Random ramPierce = new Random();
+		int pierce = ramPierce.nextInt(6)+1;
+		return pierce;
+	}
+	
+	public int Dialog()
+	{
+		Random ramDialog = new Random();
+		int dialog = ramDialog.nextInt(4)+1;
+		return dialog;
 	}
 }

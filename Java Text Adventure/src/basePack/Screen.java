@@ -16,22 +16,20 @@ public class Screen extends Application //extends BackProgram
 {
 	protected static TextArea TABase = new TextArea();//Main screen
 	protected static TextField TF = new TextField();//Text field for what the player can enter
-	protected static Button clearB = new Button("Clear");//Clear button clears all screens
 	protected static Button proceedB = new Button("Proceed");//Button to go forward with anything that is entered into the screen
 	private Button mainB = new Button("To main screen");//Exits to main screen
 	protected static Button actExitB = new Button("Exit");//Used to exit the application
 	protected static TextArea TALog = new TextArea();//The screen which shows combat things
 	protected static TextArea TALocation = new TextArea();//The screen that shows the X and Y location of the player and enemy
-	protected static File theFile = new File ("Results\\PlayerResults.txt"); //A file to where the results are released to
+	protected static File playerFile = new File ("Results\\PlayerResults.txt"); //A file to where the results are released to
 	private Button resB = new Button("Apply resolution");// Used to apply resolution of the main screen
 	private int selct = 0;
-	//protected Scanner weaponReader = new Scanner();
 
 	public static void main(String[] args) throws IOException
 	{
-		if(!theFile.exists())//Used to create the file within the location specified if it does not exist
+		if(!playerFile.exists())//Used to create the file within the location specified if it does not exist
 		{
-			theFile.createNewFile(); 
+			playerFile.createNewFile(); 
 		}
 		Application.launch();
 	}
@@ -210,20 +208,6 @@ public class Screen extends Application //extends BackProgram
 		Label L = new Label("Input Here->");
 		TF.setMaxWidth(100);
 		TF.setMinWidth(100);
-		clearB.setDisable(true);
-		clearB.setOnAction((e)->
-		{
-			Alert update = new Alert(Alert.AlertType.CONFIRMATION);
-			update.setHeaderText(null);
-			update.setContentText("Screen Wipe (Wipes all screens)");
-			Optional<ButtonType> result = update.showAndWait();
-			if(result.get() == ButtonType.OK)
-			{
-				TALocation.clear();
-				TALog.clear();
-				TABase.clear();
-			}
-		});
 		//Section of smaller areas divided to give a good amount of spacing
 		//Top Section
 		VBox topLeftArea = new VBox(LocationLabel,TALocation);
@@ -235,7 +219,7 @@ public class Screen extends Application //extends BackProgram
 		//Mid Section
 		HBox midArea1 = new HBox(L,TF,proceedB);
 		midArea1.setStyle("-fx-alignment: center;-fx-spacing:30");
-		HBox midArea2 = new HBox(clearB,actExitB);
+		HBox midArea2 = new HBox(actExitB);
 		midArea2.setStyle("-fx-alignment: center;-fx-spacing:10");
 		//Grouping of smaller areas into one bigger area
 		HBox topArea = new HBox(topLeftArea,topMidArea,topRightArea);

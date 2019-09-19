@@ -1,7 +1,5 @@
 package basePack;
 
-import java.util.ArrayList;
-
 public class Stats 
 {
 	protected int health;
@@ -35,7 +33,7 @@ public class Stats
 		return armour;
 	}
 	
-	public int HealHp(int hp)
+	public int RestoreHp(int hp)
 	{
 		health = hp;
 		return health;
@@ -47,7 +45,7 @@ public class Stats
 		return health; 
 	}
 	
-	public int HealArmour(int arm)
+	public int RestoreArmour(int arm)
 	{
 		armour = arm;
 		return armour;
@@ -61,6 +59,9 @@ public class Stats
 	
 	public String toString()
 	{
+		String display = "\nHealth: ["+health+"] \nArmour: ["+armour+"]";
+		return display;
+		/*
 		ArrayList<String> display = new ArrayList<String>();
 		int count = 0;
 		int bars = getHealth();
@@ -88,6 +89,7 @@ public class Stats
 			listArray.append(array);
 		}		
 		return listArray.toString();
+		*/
 	}
 	
 }

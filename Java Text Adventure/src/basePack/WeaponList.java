@@ -8,18 +8,17 @@ public class WeaponList
 	protected int maxDamage;
 	protected String length;
 	protected int ammo;
+	protected int pierce;
 
-	public WeaponList(String name,int minDamage,int maxDamage,int range, int ammo)
+	public WeaponList(String name,int minDamage,int maxDamage, int pierce,int range,int ammo)
 	{
 		this.name = name;
 		this.minDamage = minDamage;
 		this.maxDamage = maxDamage;
+		this.pierce = pierce;
 		this.range = range;
 		setLength();
-		if (range > 1)
-		{
-			this.ammo = ammo;
-		}
+		this.ammo = ammo;
 	}
 
 	public void Fire()
@@ -59,14 +58,22 @@ public class WeaponList
 	{ 
 		return maxDamage; 
 	}
+
+	public int getpierceDamage()
+	{
+		return pierce;
+	}
+	
 	public int getRange() 
 	{ 
 		return range; 
 	}
+	
 	public String getLength() 
 	{ 
 		return length; 
 	}
+	
 	public int getAmmo() 
 	{ 
 		return ammo; 
@@ -86,15 +93,11 @@ public class WeaponList
 		{
 			length = "Ranged";
 		}
-		else
-		{
-			System.out.println("Out of range index");
-		}
 	}
 
 	public String toString()
 	{
-		String display = "Name: " + name + "\nDamage: " + minDamage +"-"+ maxDamage + "\nRange: " + length +" ("+range+") " + " \nAmmo:  [" + ammo + "] ";
+		String display = "Name: "+name+"\nDamage: ["+minDamage+"-"+maxDamage+"]\nPierce: "+pierce+"\nRange: "+length+" ("+range+") "+" \nAmmo:  ["+ ammo +"] ";
 		return display;
 	}
 }
